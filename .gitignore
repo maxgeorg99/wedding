@@ -5,8 +5,8 @@ spacetimedb/node_modules/
 # Build output
 dist/
 
-# Generated bindings
-src/module_bindings/
+# Generated bindings (committed because Vercel needs them for build)
+# src/module_bindings/
 
 # Environment
 .env.local
@@ -36,3 +36,4 @@ docs/
 # Lock files (bun)
 bun.lock
 spacetimedb/bun.lock
+.vercel
