@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+spacetimedb/node_modules/
+
+# Build output
+dist/
+
+# Generated bindings
+src/module_bindings/
+
+# Environment
+.env.local
+.env
+
+# SpacetimeDB
+spacetime.local.json
+
+# Editor / IDE
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# AI agent rules
+.windsurfrules
+AGENTS.md
+
+# Superpowers
+.superpowers/
+
+# Docs (internal)
+docs/
+
+# Lock files (bun)
+bun.lock
+spacetimedb/bun.lock
