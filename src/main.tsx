@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import App from './App.tsx';
 import RsvpPage from './RsvpPage.tsx';
+import HeartGame from './HeartGame.tsx';
 import './wedding.css';
 import { Identity } from 'spacetimedb';
 import { SpacetimeDBProvider } from 'spacetimedb/react';
@@ -15,7 +16,7 @@ const TOKEN_KEY = `${HOST}/${DB_NAME}/auth_token`;
 const onConnect = (conn: DbConnection, identity: Identity, token: string) => {
   localStorage.setItem(TOKEN_KEY, token);
   console.log('Connected to SpacetimeDB:', identity.toHexString());
-  conn.subscriptionBuilder().subscribe(['SELECT * FROM guest']);
+  conn.subscriptionBuilder().subscribe(['SELECT * FROM guest', 'SELECT * FROM heart_score']);
 };
 
 const onDisconnect = () => {
@@ -41,6 +42,7 @@ createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/rsvp" element={<RsvpPage />} />
+          <Route path="/herzen" element={<HeartGame />} />
         </Routes>
       </BrowserRouter>
     </SpacetimeDBProvider>

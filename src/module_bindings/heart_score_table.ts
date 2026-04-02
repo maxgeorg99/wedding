@@ -12,11 +12,7 @@ import {
 
 export default __t.row({
   id: __t.u64().primaryKey(),
-  name: __t.string(),
-  attending: __t.bool(),
-  plusOne: __t.bool().name("plus_one"),
-  plusOneName: __t.option(__t.string()).name("plus_one_name"),
-  dietaryNotes: __t.option(__t.string()).name("dietary_notes"),
-  claimedBy: __t.option(__t.identity()).name("claimed_by"),
-  createdAt: __t.timestamp().name("created_at"),
+  playerName: __t.string().name("player_name"),
+  score: __t.u64(),
+  updatedAt: __t.timestamp().name("updated_at"),
 });

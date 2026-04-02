@@ -17,7 +17,16 @@ export const Guest = __t.object("Guest", {
   plusOne: __t.bool(),
   plusOneName: __t.option(__t.string()),
   dietaryNotes: __t.option(__t.string()),
+  claimedBy: __t.option(__t.identity()),
   createdAt: __t.timestamp(),
 });
 export type Guest = __Infer<typeof Guest>;
+
+export const HeartScore = __t.object("HeartScore", {
+  id: __t.u64(),
+  playerName: __t.string(),
+  score: __t.u64(),
+  updatedAt: __t.timestamp(),
+});
+export type HeartScore = __Infer<typeof HeartScore>;
 

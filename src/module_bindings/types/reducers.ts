@@ -8,7 +8,9 @@ import { type Infer as __Infer } from "spacetimedb";
 // Import all reducer arg schemas
 import RemoveGuestReducer from "../remove_guest_reducer";
 import RsvpReducer from "../rsvp_reducer";
+import SubmitScoreReducer from "../submit_score_reducer";
 
 export type RemoveGuestParams = __Infer<typeof RemoveGuestReducer>;
 export type RsvpParams = __Infer<typeof RsvpReducer>;
+export type SubmitScoreParams = __Infer<typeof SubmitScoreReducer>;
 

@@ -4,7 +4,9 @@
   "description": "",
   "scripts": {
     "build": "spacetime build",
-    "publish": "spacetime publish"
+    "publish": "spacetime publish wedding --module-path .",
+    "publish:clean": "spacetime publish wedding --clear-database -y --module-path .",
+    "generate": "spacetime generate --lang typescript --out-dir ../src/module_bindings --module-path ."
   },
   "keywords": [],
   "author": "",

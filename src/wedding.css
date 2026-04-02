@@ -530,6 +530,168 @@ h1, h2 {
   margin-right: auto;
 }
 
+/* ===== Heart Game ===== */
+.heart-game-container {
+  margin: 0 auto;
+  max-width: 500px;
+}
+
+.heart-game-hud {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.heart-hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heart-hud-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #8b7355;
+}
+
+.heart-hud-value {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #5a3e2b;
+  line-height: 1.2;
+}
+
+.heart-game-area {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  background: linear-gradient(180deg, #fef9f3 0%, #f5ece2 60%, #ede0d2 100%);
+  border: 1px solid #d4c4b0;
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: inset 0 2px 12px rgba(90, 62, 43, 0.06);
+}
+
+.heart-target {
+  position: absolute;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.heart-target:active {
+  transform: scale(1.3);
+}
+
+.heart-emoji {
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(196, 149, 106, 0.3));
+}
+
+/* ===== Heart Leaderboard ===== */
+.heart-leaderboard {
+  padding: 0 0 1rem;
+}
+
+.heart-leaderboard h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.heart-leaderboard-list {
+  list-style: none;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.heart-leaderboard-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  background: #fff;
+  border: 1px solid #e8ddd0;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  transition: transform 0.4s ease, box-shadow 0.4s ease, background-color 0.4s ease;
+}
+
+.heart-leaderboard-item.heart-rank-changed {
+  animation: rankPulse 1.8s ease;
+}
+
+.heart-leaderboard-item.heart-current-player {
+  border-color: #c4956a;
+  background: #fef9f3;
+}
+
+@keyframes rankPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(196,149,106,0); background: #fff; }
+  15% { transform: scale(1.03); box-shadow: 0 3px 16px rgba(196,149,106,0.35); background: #fef3e8; }
+  50% { transform: scale(1.01); box-shadow: 0 2px 8px rgba(196,149,106,0.2); background: #fef9f3; }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(196,149,106,0); background: #fff; }
+}
+
+.heart-rank {
+  font-size: 1.1rem;
+  min-width: 2rem;
+  text-align: center;
+  font-weight: 700;
+  color: #5a3e2b;
+}
+
+.heart-player-name {
+  flex: 1;
+  text-align: left;
+  font-weight: 600;
+  color: #5a3e2b;
+}
+
+.heart-player-score {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #c4956a;
+}
+
+.heart-finished {
+  text-align: center;
+}
+
+.heart-result-card {
+  background: #fef9f3;
+  color: #5a3e2b;
+  border: 1px solid #d4c4b0;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.heart-result-score {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #c4956a;
+}
+
+.heart-name-entry {
+  text-align: center;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
   .countdown-value {
@@ -571,5 +733,9 @@ h1, h2 {
 
   .hero {
     padding-top: 2rem;
+  }
+
+  .heart-game-area {
+    height: 350px;
   }
 }

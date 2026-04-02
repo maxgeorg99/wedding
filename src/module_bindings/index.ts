@@ -36,11 +36,13 @@ import {
 // Import all reducer arg schemas
 import RemoveGuestReducer from "./remove_guest_reducer";
 import RsvpReducer from "./rsvp_reducer";
+import SubmitScoreReducer from "./submit_score_reducer";
 
 // Import all procedure arg schemas
 
 // Import all table schema definitions
 import GuestRow from "./guest_table";
+import HeartScoreRow from "./heart_score_table";
 
 /** Type-only namespace exports for generated type groups. */
 
@@ -49,6 +51,9 @@ const tablesSchema = __schema({
   guest: __table({
     name: 'guest',
     indexes: [
+      { accessor: 'byIdentity', name: 'guest_claimed_by_idx_btree', algorithm: 'btree', columns: [
+        'claimedBy',
+      ] },
       { accessor: 'id', name: 'guest_id_idx_btree', algorithm: 'btree', columns: [
         'id',
       ] },
@@ -60,12 +65,27 @@ const tablesSchema = __schema({
       { name: 'guest_id_key', constraint: 'unique', columns: ['id'] },
     ],
   }, GuestRow),
+  heartScore: __table({
+    name: 'heart_score',
+    indexes: [
+      { accessor: 'id', name: 'heart_score_id_idx_btree', algorithm: 'btree', columns: [
+        'id',
+      ] },
+      { accessor: 'byPlayerName', name: 'heart_score_player_name_idx_btree', algorithm: 'btree', columns: [
+        'playerName',
+      ] },
+    ],
+    constraints: [
+      { name: 'heart_score_id_key', constraint: 'unique', columns: ['id'] },
+    ],
+  }, HeartScoreRow),
 });
 
 /** The schema information for all reducers in this module. This is defined the same way as the reducers would have been defined in the server, except the body of the reducer is omitted in code generation. */
 const reducersSchema = __reducers(
   __reducerSchema("remove_guest", RemoveGuestReducer),
   __reducerSchema("rsvp", RsvpReducer),
+  __reducerSchema("submit_score", SubmitScoreReducer),
 );
 
 /** The schema information for all procedures in this module. This is defined the same way as the procedures would have been defined in the server. */

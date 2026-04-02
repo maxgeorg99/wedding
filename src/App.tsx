@@ -119,24 +119,8 @@ function App() {
           <h2>Zeitplan</h2>
           <ul className="timeline-list">
             <li className="timeline-item">
-              <span className="timeline-time">14:00</span>
-              <span className="timeline-event">Empfang</span>
-            </li>
-            <li className="timeline-item">
-              <span className="timeline-time">15:00</span>
-              <span className="timeline-event">Trauung</span>
-            </li>
-            <li className="timeline-item">
-              <span className="timeline-time">16:00</span>
-              <span className="timeline-event">Kaffee &amp; Kuchen</span>
-            </li>
-            <li className="timeline-item">
-              <span className="timeline-time">18:00</span>
-              <span className="timeline-event">Abendessen</span>
-            </li>
-            <li className="timeline-item">
-              <span className="timeline-time">20:00</span>
-              <span className="timeline-event">Party</span>
+              <span className="timeline-time">TBD</span>
+              <span className="timeline-event">TBD</span>
             </li>
           </ul>
         </section>

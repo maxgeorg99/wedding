@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Fuse from 'fuse.js';
 import { tables, reducers } from './module_bindings';
 import { useTable, useReducer, useSpacetimeDB } from 'spacetimedb/react';
@@ -103,6 +104,9 @@ export default function RsvpForm() {
         <button className="rsvp-submit" onClick={resetSelection} style={{ marginTop: '1rem' }}>
           Weitere Antwort eintragen
         </button>
+        <Link to="/herzen" className="rsvp-button" style={{ display: 'inline-block', marginTop: '1rem' }}>
+          &#9654; Herzen sammeln
+        </Link>
       </section>
     );
   }
@@ -183,7 +187,7 @@ export default function RsvpForm() {
                     checked={plusOne}
                     onChange={(e) => setPlusOne(e.target.checked)}
                   />
-                  Ich bringe eine Begleitung mit
+                  Ich möchte eine Begleitung mitbringen
                 </label>
               </div>
 
