@@ -67,7 +67,7 @@ function App() {
           </div>
           <p>
             Nach 10 wundervollen gemeinsamen Jahren möchten wir unsere Liebe an
-            einem schönen Herbsttag im Kreise unserer Liebsten feiern und besiegeln.
+            einem schönen Herbsttag im Kreise unserer Liebsten feiern.
           </p>
         </section>
 
@@ -104,7 +104,7 @@ function App() {
           <h2>FAQs</h2>
           <div className="faq-item">
             <p className="faq-question">Gibt es einen Dresscode?</p>
-            <p className="faq-answer">Warme Herbstfarben.</p>
+            <p className="faq-answer">Herbstfarben</p>
           </div>
           <div className="faq-item">
             <p className="faq-question">Gibt es Parkplätze vor Ort?</p>
@@ -120,7 +120,6 @@ function App() {
           <ul className="timeline-list">
             <li className="timeline-item">
               <span className="timeline-time">TBD</span>
-              <span className="timeline-event">TBD</span>
             </li>
           </ul>
         </section>

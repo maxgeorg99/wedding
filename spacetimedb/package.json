@@ -6,6 +6,8 @@
     "build": "spacetime build",
     "publish": "spacetime publish wedding --module-path .",
     "publish:clean": "spacetime publish wedding --clear-database -y --module-path .",
+    "publish:local": "spacetime publish wedding --module-path . --server local",
+    "publish:local:clean": "spacetime publish wedding --clear-database -y --module-path . --server local",
     "generate": "spacetime generate --lang typescript --out-dir ../src/module_bindings --module-path ."
   },
   "keywords": [],
