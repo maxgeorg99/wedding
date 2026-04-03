@@ -1,27 +1,30 @@
 import { schema, table, t } from 'spacetimedb/server';
 import { SenderError } from 'spacetimedb/server';
+import { requirePlanner } from './auth';
+
+const guest = table(
+  {
+    name: 'guest',
+    public: true,
+    indexes: [
+      { accessor: 'byName', algorithm: 'btree', columns: ['name'] },
+      { accessor: 'byIdentity', algorithm: 'btree', columns: ['claimedBy'] },
+    ],
+  },
+  {
+    id: t.u64().primaryKey().autoInc(),
+    name: t.string(),
+    attending: t.bool(),
+    plusOne: t.bool(),
+    plusOneName: t.string().optional(),
+    dietaryNotes: t.string().optional(),
+    claimedBy: t.identity().optional(),
+    createdAt: t.timestamp(),
+  }
+);
 
 const spacetimedb = schema({
-  guest: table(
-    {
-      name: 'guest',
-      public: true,
-      indexes: [
-        { accessor: 'byName', algorithm: 'btree', columns: ['name'] },
-        { accessor: 'byIdentity', algorithm: 'btree', columns: ['claimedBy'] },
-      ],
-    },
-    {
-      id: t.u64().primaryKey().autoInc(),
-      name: t.string(),
-      attending: t.bool(),
-      plusOne: t.bool(),
-      plusOneName: t.string().optional(),
-      dietaryNotes: t.string().optional(),
-      claimedBy: t.identity().optional(),
-      createdAt: t.timestamp(),
-    }
-  ),
+  guest,
   heartScore: table(
     {
       name: 'heart_score',
@@ -35,8 +38,34 @@ const spacetimedb = schema({
       updatedAt: t.timestamp(),
     }
   ),
+  weddingTodo: table(
+    {
+      name: 'wedding_todo',
+      public: true,
+    },
+    {
+      id: t.u64().primaryKey().autoInc(),
+      title: t.string(),
+      done: t.bool(),
+      sortOrder: t.u64(),
+      createdAt: t.timestamp(),
+    }
+  ),
 });
 export default spacetimedb;
+
+// View: guests who haven't RSVP'd yet (no claimedBy) — used for the RSVP search input
+export const unclaimed_guests = spacetimedb.anonymousView(
+  { name: 'unclaimed_guests', public: true },
+  t.array(guest.rowType),
+  (ctx) => {
+    const result = [];
+    for (const g of ctx.db.guest.iter()) {
+      if (!g.claimedBy) result.push(g);
+    }
+    return result;
+  }
+);
 
 const SEED_GUESTS = [
   "Alexandra Hahn",
@@ -164,12 +193,81 @@ export const rsvp = spacetimedb.reducer(
 export const remove_guest = spacetimedb.reducer(
   { guestId: t.u64() },
   (ctx, { guestId }) => {
+    requirePlanner(ctx);
     const guest = ctx.db.guest.id.find(guestId);
     if (!guest) throw new SenderError('Guest not found');
     ctx.db.guest.id.delete(guestId);
   }
 );
 
+
+export const add_todo = spacetimedb.reducer(
+  { title: t.string() },
+  (ctx, { title }) => {
+    requirePlanner(ctx);
+    if (!title.trim()) throw new SenderError('Titel ist erforderlich');
+    let maxOrder = 0n;
+    for (const todo of ctx.db.weddingTodo.iter()) {
+      if (todo.sortOrder > maxOrder) maxOrder = todo.sortOrder;
+    }
+    ctx.db.weddingTodo.insert({
+      id: 0n,
+      title: title.trim(),
+      done: false,
+      sortOrder: maxOrder + 1n,
+      createdAt: ctx.timestamp,
+    });
+  }
+);
+
+export const toggle_todo = spacetimedb.reducer(
+  { todoId: t.u64() },
+  (ctx, { todoId }) => {
+    requirePlanner(ctx);
+    const todo = ctx.db.weddingTodo.id.find(todoId);
+    if (!todo) throw new SenderError('Todo nicht gefunden');
+    ctx.db.weddingTodo.id.update({ ...todo, done: !todo.done });
+  }
+);
+
+export const delete_todo = spacetimedb.reducer(
+  { todoId: t.u64() },
+  (ctx, { todoId }) => {
+    requirePlanner(ctx);
+    const todo = ctx.db.weddingTodo.id.find(todoId);
+    if (!todo) throw new SenderError('Todo nicht gefunden');
+    ctx.db.weddingTodo.id.delete(todoId);
+  }
+);
+
+export const add_guest = spacetimedb.reducer(
+  { name: t.string() },
+  (ctx, { name }) => {
+    requirePlanner(ctx);
+    if (!name.trim()) throw new SenderError('Name ist erforderlich');
+    ctx.db.guest.insert({
+      id: 0n,
+      name: name.trim(),
+      attending: false,
+      plusOne: false,
+      plusOneName: undefined,
+      dietaryNotes: undefined,
+      claimedBy: undefined,
+      createdAt: ctx.timestamp,
+    });
+  }
+);
+
+export const rename_guest = spacetimedb.reducer(
+  { guestId: t.u64(), newName: t.string() },
+  (ctx, { guestId, newName }) => {
+    requirePlanner(ctx);
+    if (!newName.trim()) throw new SenderError('Name ist erforderlich');
+    const guest = ctx.db.guest.id.find(guestId);
+    if (!guest) throw new SenderError('Gast nicht gefunden');
+    ctx.db.guest.id.update({ ...guest, name: newName.trim() });
+  }
+);
 
 export const submit_score = spacetimedb.reducer(
   { score: t.u64() },

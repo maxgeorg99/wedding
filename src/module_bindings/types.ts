@@ -30,3 +30,12 @@ export const HeartScore = __t.object("HeartScore", {
 });
 export type HeartScore = __Infer<typeof HeartScore>;
 
+export const WeddingTodo = __t.object("WeddingTodo", {
+  id: __t.u64(),
+  title: __t.string(),
+  done: __t.bool(),
+  sortOrder: __t.u64(),
+  createdAt: __t.timestamp(),
+});
+export type WeddingTodo = __Infer<typeof WeddingTodo>;
+

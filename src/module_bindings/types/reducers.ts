@@ -6,11 +6,21 @@
 import { type Infer as __Infer } from "spacetimedb";
 
 // Import all reducer arg schemas
+import AddGuestReducer from "../add_guest_reducer";
+import AddTodoReducer from "../add_todo_reducer";
+import DeleteTodoReducer from "../delete_todo_reducer";
 import RemoveGuestReducer from "../remove_guest_reducer";
+import RenameGuestReducer from "../rename_guest_reducer";
 import RsvpReducer from "../rsvp_reducer";
 import SubmitScoreReducer from "../submit_score_reducer";
+import ToggleTodoReducer from "../toggle_todo_reducer";
 
+export type AddGuestParams = __Infer<typeof AddGuestReducer>;
+export type AddTodoParams = __Infer<typeof AddTodoReducer>;
+export type DeleteTodoParams = __Infer<typeof DeleteTodoReducer>;
 export type RemoveGuestParams = __Infer<typeof RemoveGuestReducer>;
+export type RenameGuestParams = __Infer<typeof RenameGuestReducer>;
 export type RsvpParams = __Infer<typeof RsvpReducer>;
 export type SubmitScoreParams = __Infer<typeof SubmitScoreReducer>;
+export type ToggleTodoParams = __Infer<typeof ToggleTodoReducer>;
 

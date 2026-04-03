@@ -15,7 +15,7 @@ interface GuestRow {
 
 export default function RsvpForm() {
   const conn = useSpacetimeDB();
-  const [guests] = useTable(tables.guest);
+  const [unclaimedGuests] = useTable(tables.unclaimedGuests);
   const rsvp = useReducer(reducers.rsvp);
 
   const [query, setQuery] = useState('');
@@ -29,8 +29,8 @@ export default function RsvpForm() {
   const fieldRef = useRef<HTMLDivElement>(null);
 
   const fuse = useMemo(
-    () => new Fuse(guests as GuestRow[], { keys: ['name'], threshold: 0.4 }),
-    [guests]
+    () => new Fuse(unclaimedGuests as GuestRow[], { keys: ['name'], threshold: 0.4 }),
+    [unclaimedGuests]
   );
 
   const suggestions = useMemo(() => {

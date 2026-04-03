@@ -34,15 +34,21 @@ import {
 } from "spacetimedb";
 
 // Import all reducer arg schemas
+import AddGuestReducer from "./add_guest_reducer";
+import AddTodoReducer from "./add_todo_reducer";
+import DeleteTodoReducer from "./delete_todo_reducer";
 import RemoveGuestReducer from "./remove_guest_reducer";
+import RenameGuestReducer from "./rename_guest_reducer";
 import RsvpReducer from "./rsvp_reducer";
 import SubmitScoreReducer from "./submit_score_reducer";
+import ToggleTodoReducer from "./toggle_todo_reducer";
 
 // Import all procedure arg schemas
 
 // Import all table schema definitions
 import GuestRow from "./guest_table";
 import HeartScoreRow from "./heart_score_table";
+import WeddingTodoRow from "./wedding_todo_table";
 
 /** Type-only namespace exports for generated type groups. */
 
@@ -79,13 +85,29 @@ const tablesSchema = __schema({
       { name: 'heart_score_id_key', constraint: 'unique', columns: ['id'] },
     ],
   }, HeartScoreRow),
+  weddingTodo: __table({
+    name: 'wedding_todo',
+    indexes: [
+      { accessor: 'id', name: 'wedding_todo_id_idx_btree', algorithm: 'btree', columns: [
+        'id',
+      ] },
+    ],
+    constraints: [
+      { name: 'wedding_todo_id_key', constraint: 'unique', columns: ['id'] },
+    ],
+  }, WeddingTodoRow),
 });
 
 /** The schema information for all reducers in this module. This is defined the same way as the reducers would have been defined in the server, except the body of the reducer is omitted in code generation. */
 const reducersSchema = __reducers(
+  __reducerSchema("add_guest", AddGuestReducer),
+  __reducerSchema("add_todo", AddTodoReducer),
+  __reducerSchema("delete_todo", DeleteTodoReducer),
   __reducerSchema("remove_guest", RemoveGuestReducer),
+  __reducerSchema("rename_guest", RenameGuestReducer),
   __reducerSchema("rsvp", RsvpReducer),
   __reducerSchema("submit_score", SubmitScoreReducer),
+  __reducerSchema("toggle_todo", ToggleTodoReducer),
 );
 
 /** The schema information for all procedures in this module. This is defined the same way as the procedures would have been defined in the server. */
