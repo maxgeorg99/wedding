@@ -131,6 +131,7 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const [activeTab, setActiveTab] = useState<'guests' | 'todos'>('guests');
   const [editingId, setEditingId] = useState<bigint | null>(null);
   const [editingName, setEditingName] = useState('');
+  const [guestFilter, setGuestFilter] = useState<'all' | 'attending' | 'declined' | 'pending'>('all');
 
   const sortedTodos = [...todos].sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
@@ -249,8 +250,25 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
               />
               <button onClick={handleAddGuest} className="planner-add-btn">+</button>
             </div>
+            <div className="planner-filter-row">
+              {(['all', 'attending', 'declined', 'pending'] as const).map((f) => (
+                <button
+                  key={f}
+                  className={`planner-filter-btn ${guestFilter === f ? 'active' : ''}`}
+                  onClick={() => setGuestFilter(f)}
+                >
+                  {{ all: 'Alle', attending: 'Zugesagt', declined: 'Abgesagt', pending: 'Offen' }[f]}
+                </button>
+              ))}
+            </div>
             <ul className="planner-guest-list">
               {[...guests]
+                .filter((g) => {
+                  if (guestFilter === 'attending') return g.attending;
+                  if (guestFilter === 'declined') return !g.attending && !!g.claimedBy;
+                  if (guestFilter === 'pending') return !g.attending && !g.claimedBy;
+                  return true;
+                })
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map((guest) => (
                   <li key={guest.id.toString()} className="planner-guest-item">

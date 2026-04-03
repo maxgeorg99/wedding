@@ -123,6 +123,10 @@ function App() {
             </li>
           </ul>
         </section>
+
+        <footer className="wedding-footer">
+          <Link to="/impressum">Impressum</Link>
+        </footer>
       </div>
     </>
   );

@@ -5,6 +5,7 @@ import App from './App.tsx';
 import RsvpPage from './RsvpPage.tsx';
 import HeartGame from './HeartGame.tsx';
 import PlannerPage from './PlannerPage.tsx';
+import ImpressumPage from './ImpressumPage.tsx';
 import './wedding.css';
 import { Identity } from 'spacetimedb';
 import { SpacetimeDBProvider } from 'spacetimedb/react';
@@ -48,6 +49,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/rsvp" element={<RsvpPage />} />
           <Route path="/herzen" element={<HeartGame />} />
           <Route path="/planner" element={<PlannerPage />} />
+          <Route path="/impressum" element={<ImpressumPage />} />
         </Routes>
       </BrowserRouter>
     </SpacetimeDBProvider>

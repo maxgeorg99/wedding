@@ -756,7 +756,36 @@ h1, h2 {
 .planner-add-row {
   display: flex;
   gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.planner-filter-row {
+  display: flex;
+  gap: 0.4rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.planner-filter-btn {
+  background: transparent;
+  border: 1px solid #d4c5b0;
+  color: #8b7355;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.planner-filter-btn:hover {
+  border-color: #c4956a;
+  color: #c4956a;
+}
+
+.planner-filter-btn.active {
+  background: #c4956a;
+  border-color: #c4956a;
+  color: #fff;
 }
 
 .planner-input {
@@ -987,4 +1016,41 @@ h1, h2 {
   .heart-game-area {
     height: 350px;
   }
+}
+
+/* ===== Footer ===== */
+.wedding-footer {
+  text-align: center;
+  padding: 2rem 0 1rem;
+  font-size: 0.85rem;
+}
+
+.wedding-footer a {
+  color: #a89279;
+  text-decoration: none;
+}
+
+.wedding-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ===== Impressum ===== */
+.impressum {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.impressum h1 {
+  margin-bottom: 2rem;
+}
+
+.impressum h2 {
+  font-size: 1.1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.impressum p {
+  margin-bottom: 0.75rem;
 }
