@@ -48,6 +48,7 @@ import ToggleTodoReducer from "./toggle_todo_reducer";
 // Import all table schema definitions
 import GuestRow from "./guest_table";
 import HeartScoreRow from "./heart_score_table";
+import UnclaimedGuestsRow from "./unclaimed_guests_table";
 import WeddingTodoRow from "./wedding_todo_table";
 
 /** Type-only namespace exports for generated type groups. */
@@ -96,6 +97,13 @@ const tablesSchema = __schema({
       { name: 'wedding_todo_id_key', constraint: 'unique', columns: ['id'] },
     ],
   }, WeddingTodoRow),
+  unclaimed_guests: __table({
+    name: 'unclaimed_guests',
+    indexes: [
+    ],
+    constraints: [
+    ],
+  }, UnclaimedGuestsRow),
 });
 
 /** The schema information for all reducers in this module. This is defined the same way as the reducers would have been defined in the server, except the body of the reducer is omitted in code generation. */
