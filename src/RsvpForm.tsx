@@ -15,7 +15,7 @@ interface GuestRow {
 
 export default function RsvpForm() {
   const conn = useSpacetimeDB();
-  const [unclaimedGuests] = useTable(tables.unclaimedGuests);
+  const [unclaimedGuests] = useTable(tables.unclaimed_guests);
   const rsvp = useReducer(reducers.rsvp);
 
   const [query, setQuery] = useState('');
