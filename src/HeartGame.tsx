@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import Fuse from 'fuse.js';
 import { tables, reducers } from './module_bindings';
 import { useTable, useReducer, useSpacetimeDB } from 'spacetimedb/react';
 import FallingLeaves from './FallingLeaves';
@@ -13,19 +14,20 @@ interface Heart {
   collected: boolean;
 }
 
-type GameState = 'not-registered' | 'ready' | 'playing' | 'finished';
+type GameState = 'pick-name' | 'ready' | 'playing' | 'finished';
 
 const GAME_DURATION = 30;
 const SPAWN_INTERVAL = 400;
 
 export default function HeartGame() {
   const conn = useSpacetimeDB();
-  const [guests] = useTable(tables.guest);
+  const [guests, guestsReady] = useTable(tables.guest);
   const [scores] = useTable(tables.heartScore);
   const submitScore = useReducer(reducers.submitScore);
+  const startGameReducer = useReducer(reducers.startGame);
 
-  // Resolve player name from identity — the guest who RSVP'd on this device
-  const playerName = useMemo(() => {
+  // Auto-detect name from identity (if RSVP'd on this device)
+  const autoName = useMemo(() => {
     if (!conn.identity) return '';
     const myHex = conn.identity.toHexString();
     for (const g of guests) {
@@ -36,21 +38,51 @@ export default function HeartGame() {
     return '';
   }, [guests, conn.identity]);
 
-  const [gameState, setGameState] = useState<GameState>('ready');
+  const [playerName, setPlayerName] = useState('');
+  const [nameQuery, setNameQuery] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [gameState, setGameState] = useState<GameState>('pick-name');
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const [hearts, setHearts] = useState<Heart[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [starting, setStarting] = useState(false);
   const heartIdRef = useRef(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
+  const fieldRef = useRef<HTMLDivElement>(null);
 
-  // Determine initial state based on identity
+  // If identity is already linked to a guest, skip the name picker
   useEffect(() => {
-    if (gameState === 'ready' && !playerName && conn.isActive) {
-      setGameState('not-registered');
-    } else if (gameState === 'not-registered' && playerName) {
+    if (autoName && gameState === 'pick-name') {
+      setPlayerName(autoName);
       setGameState('ready');
     }
-  }, [playerName, conn.isActive, gameState]);
+  }, [autoName, gameState]);
+
+  // Fuzzy search over guest names
+  const guestNames = useMemo(
+    () => guests.map((g) => ({ name: g.name })),
+    [guests]
+  );
+  const fuse = useMemo(
+    () => new Fuse(guestNames, { keys: ['name'], threshold: 0.4 }),
+    [guestNames]
+  );
+  const suggestions = useMemo(() => {
+    if (nameQuery.length < 1) return [];
+    return fuse.search(nameQuery).slice(0, 5);
+  }, [fuse, nameQuery]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (fieldRef.current && !fieldRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   // Sorted leaderboard with previous positions for animation
   const prevRanksRef = useRef<Map<string, number>>(new Map());
@@ -80,7 +112,7 @@ export default function HeartGame() {
     }
     const timer = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(timer);
-  }, [gameState, timeLeft, score, submitScore]);
+  }, [gameState, timeLeft]);
 
   // Spawn hearts
   useEffect(() => {
@@ -128,23 +160,40 @@ export default function HeartGame() {
     setScore((s) => {
       const newScore = s + 1;
       scoreRef.current = newScore;
-      submitScore({ score: BigInt(newScore) });
+      submitScore({ guestName: playerName, score: BigInt(newScore) }).catch(() => {
+        setGameState('finished');
+      });
       return newScore;
     });
-  }, [submitScore]);
+  }, [submitScore, playerName]);
 
-  const startGame = () => {
-    setScore(0);
-    scoreRef.current = 0;
-    setTimeLeft(GAME_DURATION);
-    setHearts([]);
-    heartIdRef.current = 0;
-    setGameState('playing');
-    // Sofort in der Rangliste erscheinen
-    submitScore({ score: 0n });
+  const startGame = async () => {
+    setError(null);
+    setStarting(true);
+    try {
+      await startGameReducer({ guestName: playerName });
+      setScore(0);
+      scoreRef.current = 0;
+      setTimeLeft(GAME_DURATION);
+      setHearts([]);
+      heartIdRef.current = 0;
+      setGameState('playing');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Unbekannter Fehler';
+      setError(msg);
+    } finally {
+      setStarting(false);
+    }
   };
 
-  if (!conn.isActive) {
+  const selectName = (name: string) => {
+    setPlayerName(name);
+    setNameQuery(name);
+    setShowDropdown(false);
+    setGameState('ready');
+  };
+
+  if (!conn.isActive || !guestsReady) {
     return (
       <div className="wedding-page" style={{ paddingTop: '2rem' }}>
         <p style={{ color: '#8b7355' }}>Verbindung wird hergestellt...</p>
@@ -163,24 +212,56 @@ export default function HeartGame() {
 
         <hr className="section-divider" />
 
-        {gameState === 'not-registered' && (
+        {error && (
+          <div className="heart-result-card" style={{ marginBottom: '1rem', color: '#c44' }}>
+            <p>{error}</p>
+          </div>
+        )}
+
+        {gameState === 'pick-name' && (
           <div className="heart-name-entry">
-            <div className="heart-result-card">
-              <p>Du musst dich zuerst auf der RSVP-Seite anmelden, um spielen zu können.</p>
+            <p className="rsvp-hint">Wie heißt du?</p>
+            <div className="rsvp-field" ref={fieldRef}>
+              <input
+                type="text"
+                value={nameQuery}
+                onChange={(e) => {
+                  setNameQuery(e.target.value);
+                  setShowDropdown(true);
+                }}
+                onFocus={() => setShowDropdown(true)}
+                placeholder="Name eingeben..."
+                autoComplete="off"
+                autoFocus
+              />
+              {showDropdown && suggestions.length > 0 && (
+                <ul className="rsvp-dropdown">
+                  {suggestions.map(({ item }) => (
+                    <li key={item.name} onClick={() => selectName(item.name)}>
+                      {item.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {showDropdown && nameQuery.length >= 2 && suggestions.length === 0 && (
+                <div className="rsvp-dropdown">
+                  <p className="rsvp-dropdown-empty">Kein Ergebnis gefunden</p>
+                </div>
+              )}
             </div>
-            <Link to="/rsvp" className="rsvp-submit" style={{ display: 'inline-block', marginTop: '1rem', textDecoration: 'none' }}>
-              Zur Anmeldung
-            </Link>
           </div>
         )}
 
         {gameState === 'ready' && (
           <div className="heart-name-entry">
+            <p className="rsvp-hint" style={{ marginTop: '0.5rem' }}>
+              Hallo, <strong>{playerName}</strong>!
+            </p>
             <p className="rsvp-hint" style={{ marginTop: '0.75rem' }}>Gleich regnet es Herzen auf deinem Bildschirm.</p>
             <p className="rsvp-hint">Tippe oder klicke so schnell du kannst darauf, um sie einzusammeln!</p>
             <p className="rsvp-hint">Du hast 30 Sekunden — wer die meisten Herzen sammelt, gewinnt.</p>
-            <button className="rsvp-submit" onClick={startGame} style={{ marginTop: '1.25rem' }}>
-              &#9654; Los geht's!
+            <button className="rsvp-submit" onClick={startGame} disabled={starting} style={{ marginTop: '1.25rem' }}>
+              {starting ? 'Wird gestartet...' : '\u25B6 Los geht\u2019s!'}
             </button>
           </div>
         )}
@@ -226,14 +307,14 @@ export default function HeartGame() {
               <p className="heart-result-score">{score} Herzen gesammelt!</p>
               <p>Gut gemacht, {playerName}!</p>
             </div>
-            <button className="rsvp-submit" onClick={startGame} style={{ marginTop: '1rem' }}>
-              Nochmal spielen
+            <button className="rsvp-submit" onClick={startGame} disabled={starting} style={{ marginTop: '1rem' }}>
+              {starting ? 'Wird gestartet...' : 'Nochmal spielen'}
             </button>
           </div>
         )}
 
-        {/* Leaderboard — visible during game and after */}
-        {(gameState === 'playing' || gameState === 'finished') && sortedScores.length > 0 && (
+        {/* Leaderboard — always visible when there are scores */}
+        {sortedScores.length > 0 && (
           <>
             <hr className="section-divider" />
             <div className="heart-leaderboard">

@@ -94,6 +94,8 @@ function AuthenticatedPlanner({ idToken, email, onSignOut }: { idToken: string; 
         'SELECT * FROM guest',
         'SELECT * FROM wedding_todo',
       ]);
+      // TEMPORARY — log JWT claims to server logs
+      conn.reducers.debugJwt();
     };
     const onConnectError = (_ctx: ErrorContext, err: Error) => {
       console.error('Planner connection error:', err);

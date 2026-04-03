@@ -40,12 +40,14 @@ import DeleteTodoReducer from "./delete_todo_reducer";
 import RemoveGuestReducer from "./remove_guest_reducer";
 import RenameGuestReducer from "./rename_guest_reducer";
 import RsvpReducer from "./rsvp_reducer";
+import StartGameReducer from "./start_game_reducer";
 import SubmitScoreReducer from "./submit_score_reducer";
 import ToggleTodoReducer from "./toggle_todo_reducer";
 
 // Import all procedure arg schemas
 
 // Import all table schema definitions
+import GameSessionRow from "./game_session_table";
 import GuestRow from "./guest_table";
 import HeartScoreRow from "./heart_score_table";
 import UnclaimedGuestsRow from "./unclaimed_guests_table";
@@ -55,6 +57,17 @@ import WeddingTodoRow from "./wedding_todo_table";
 
 /** The schema information for all tables in this module. This is defined the same was as the tables would have been defined in the server. */
 const tablesSchema = __schema({
+  gameSession: __table({
+    name: 'game_session',
+    indexes: [
+      { accessor: 'identity', name: 'game_session_identity_idx_btree', algorithm: 'btree', columns: [
+        'identity',
+      ] },
+    ],
+    constraints: [
+      { name: 'game_session_identity_key', constraint: 'unique', columns: ['identity'] },
+    ],
+  }, GameSessionRow),
   guest: __table({
     name: 'guest',
     indexes: [
@@ -114,6 +127,7 @@ const reducersSchema = __reducers(
   __reducerSchema("remove_guest", RemoveGuestReducer),
   __reducerSchema("rename_guest", RenameGuestReducer),
   __reducerSchema("rsvp", RsvpReducer),
+  __reducerSchema("start_game", StartGameReducer),
   __reducerSchema("submit_score", SubmitScoreReducer),
   __reducerSchema("toggle_todo", ToggleTodoReducer),
 );

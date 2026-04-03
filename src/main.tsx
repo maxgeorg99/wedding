@@ -17,7 +17,10 @@ const TOKEN_KEY = `${HOST}/${DB_NAME}/auth_token`;
 const onConnect = (conn: DbConnection, identity: Identity, token: string) => {
   localStorage.setItem(TOKEN_KEY, token);
   console.log('Connected to SpacetimeDB:', identity.toHexString());
-  conn.subscriptionBuilder().subscribe(['SELECT * FROM guest', 'SELECT * FROM heart_score', 'SELECT * FROM wedding_todo', 'SELECT * FROM unclaimed_guests']);
+  conn.subscriptionBuilder()
+    .onApplied(() => console.log('Subscription applied'))
+    .onError((e) => console.error('Subscription error:', e))
+    .subscribe(['SELECT * FROM guest', 'SELECT * FROM heart_score', 'SELECT * FROM game_session', 'SELECT * FROM wedding_todo', 'SELECT * FROM unclaimed_guests']);
 };
 
 const onDisconnect = () => {

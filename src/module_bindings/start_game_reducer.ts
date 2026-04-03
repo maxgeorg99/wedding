@@ -12,5 +12,4 @@ import {
 
 export default {
   guestName: __t.string(),
-  score: __t.u64(),
 };

@@ -10,7 +10,7 @@ import {
   type Infer as __Infer,
 } from "spacetimedb";
 
-export default {
-  guestName: __t.string(),
-  score: __t.u64(),
-};
+export default __t.row({
+  identity: __t.identity().primaryKey(),
+  startedAt: __t.timestamp().name("started_at"),
+});

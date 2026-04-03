@@ -23,8 +23,20 @@ const guest = table(
   }
 );
 
+const gameSession = table(
+  {
+    name: 'game_session',
+    public: true,
+  },
+  {
+    identity: t.identity().primaryKey(),
+    startedAt: t.timestamp(),
+  }
+);
+
 const spacetimedb = schema({
   guest,
+  gameSession,
   heartScore: table(
     {
       name: 'heart_score',
@@ -140,6 +152,20 @@ export const init = spacetimedb.init((ctx) => {
       claimedBy: undefined,
       createdAt: ctx.timestamp,
     });
+  }
+});
+
+// TEMPORARY — remove after checking JWT claims
+export const debug_jwt = spacetimedb.reducer({}, (ctx) => {
+  const auth = ctx.senderAuth;
+  if (auth.jwt) {
+    console.log('JWT subject:', auth.jwt.subject);
+    console.log('JWT issuer:', auth.jwt.issuer);
+    console.log('JWT audience:', auth.jwt.audience);
+    console.log('JWT rawPayload:', auth.jwt.rawPayload);
+    console.log('JWT fullPayload:', JSON.stringify(auth.jwt.fullPayload));
+  } else {
+    console.log('No JWT — anonymous connection');
   }
 });
 
@@ -269,19 +295,60 @@ export const rename_guest = spacetimedb.reducer(
   }
 );
 
-export const submit_score = spacetimedb.reducer(
-  { score: t.u64() },
-  (ctx, { score }) => {
-    // Resolve guest name from identity — only RSVP'd guests can play
-    let guestName: string | undefined;
-    for (const guest of ctx.db.guest.byIdentity.filter(ctx.sender)) {
-      guestName = guest.name;
-      break;
-    }
-    if (!guestName) throw new SenderError('Du musst dich zuerst anmelden (RSVP)');
+const GAME_DURATION_MICROS = 30_000_000n; // 30 seconds in microseconds
 
-    // Check if player already has a score — keep the best one
-    for (const existing of ctx.db.heartScore.byPlayerName.filter(guestName)) {
+function resolveGuestName(ctx: any, guestName: string): string {
+  // Validate the guest exists in the guest list
+  const trimmed = guestName.trim();
+  if (!trimmed) throw new SenderError('Name ist erforderlich');
+  for (const g of ctx.db.guest.byName.filter(trimmed)) {
+    return g.name;
+  }
+  throw new SenderError('Gast nicht auf der Gästeliste gefunden');
+}
+
+export const start_game = spacetimedb.reducer(
+  { guestName: t.string() },
+  (ctx, { guestName }) => {
+    const name = resolveGuestName(ctx, guestName);
+
+    // Create or reset game session
+    const existing = ctx.db.gameSession.identity.find(ctx.sender);
+    if (existing) {
+      ctx.db.gameSession.identity.update({ ...existing, startedAt: ctx.timestamp });
+    } else {
+      ctx.db.gameSession.insert({ identity: ctx.sender, startedAt: ctx.timestamp });
+    }
+
+    // Reset score to 0 for new round
+    for (const s of ctx.db.heartScore.byPlayerName.filter(name)) {
+      ctx.db.heartScore.id.update({ ...s, score: 0n, updatedAt: ctx.timestamp });
+      return;
+    }
+    ctx.db.heartScore.insert({
+      id: 0n,
+      playerName: name,
+      score: 0n,
+      updatedAt: ctx.timestamp,
+    });
+  }
+);
+
+export const submit_score = spacetimedb.reducer(
+  { guestName: t.string(), score: t.u64() },
+  (ctx, { guestName, score }) => {
+    const name = resolveGuestName(ctx, guestName);
+
+    // Check active game session and enforce 30s window
+    const session = ctx.db.gameSession.identity.find(ctx.sender);
+    if (!session) throw new SenderError('Starte zuerst ein Spiel');
+    const elapsed = ctx.timestamp.microsSinceUnixEpoch - session.startedAt.microsSinceUnixEpoch;
+    if (elapsed > GAME_DURATION_MICROS) {
+      throw new SenderError('Spielzeit abgelaufen');
+    }
+
+    // Update score (always overwrite — client sends cumulative score)
+    for (const existing of ctx.db.heartScore.byPlayerName.filter(name)) {
       if (score > existing.score) {
         ctx.db.heartScore.id.update({ ...existing, score, updatedAt: ctx.timestamp });
       }
@@ -290,7 +357,7 @@ export const submit_score = spacetimedb.reducer(
 
     ctx.db.heartScore.insert({
       id: 0n,
-      playerName: guestName,
+      playerName: name,
       score,
       updatedAt: ctx.timestamp,
     });

@@ -26,6 +26,8 @@ export default function RsvpForm() {
   const [dietaryNotes, setDietaryNotes] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fieldRef = useRef<HTMLDivElement>(null);
 
   const fuse = useMemo(
@@ -69,19 +71,26 @@ export default function RsvpForm() {
     setSubmitted(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedGuest) return;
+    if (!selectedGuest || submitting) return;
 
-    rsvp({
-      name: selectedGuest.name,
-      attending,
-      plusOne,
-      plusOneName: plusOneName.trim() || undefined,
-      dietaryNotes: dietaryNotes.trim() || undefined,
-    });
-
-    setSubmitted(true);
+    setError(null);
+    setSubmitting(true);
+    try {
+      await rsvp({
+        name: selectedGuest.name,
+        attending,
+        plusOne,
+        plusOneName: plusOneName.trim() || undefined,
+        dietaryNotes: dietaryNotes.trim() || undefined,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Etwas ist schiefgelaufen. Bitte versuche es erneut.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!conn.isActive) {
@@ -217,8 +226,11 @@ export default function RsvpForm() {
             </>
           )}
 
-          <button type="submit" className="rsvp-submit">
-            Absenden
+          {error && (
+            <p style={{ color: '#c44', marginBottom: '0.75rem' }}>{error}</p>
+          )}
+          <button type="submit" className="rsvp-submit" disabled={submitting}>
+            {submitting ? 'Wird gesendet...' : 'Absenden'}
           </button>
         </form>
       )}
