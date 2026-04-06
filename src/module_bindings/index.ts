@@ -34,8 +34,11 @@ import {
 } from "spacetimedb";
 
 // Import all reducer arg schemas
+import AddBudgetItemReducer from "./add_budget_item_reducer";
 import AddGuestReducer from "./add_guest_reducer";
 import AddTodoReducer from "./add_todo_reducer";
+import DebugJwtReducer from "./debug_jwt_reducer";
+import DeleteBudgetItemReducer from "./delete_budget_item_reducer";
 import DeleteTodoReducer from "./delete_todo_reducer";
 import RemoveGuestReducer from "./remove_guest_reducer";
 import RenameGuestReducer from "./rename_guest_reducer";
@@ -43,10 +46,12 @@ import RsvpReducer from "./rsvp_reducer";
 import StartGameReducer from "./start_game_reducer";
 import SubmitScoreReducer from "./submit_score_reducer";
 import ToggleTodoReducer from "./toggle_todo_reducer";
+import UpdateBudgetItemReducer from "./update_budget_item_reducer";
 
 // Import all procedure arg schemas
 
 // Import all table schema definitions
+import BudgetItemRow from "./budget_item_table";
 import GameSessionRow from "./game_session_table";
 import GuestRow from "./guest_table";
 import HeartScoreRow from "./heart_score_table";
@@ -57,6 +62,17 @@ import WeddingTodoRow from "./wedding_todo_table";
 
 /** The schema information for all tables in this module. This is defined the same was as the tables would have been defined in the server. */
 const tablesSchema = __schema({
+  budgetItem: __table({
+    name: 'budget_item',
+    indexes: [
+      { accessor: 'id', name: 'budget_item_id_idx_btree', algorithm: 'btree', columns: [
+        'id',
+      ] },
+    ],
+    constraints: [
+      { name: 'budget_item_id_key', constraint: 'unique', columns: ['id'] },
+    ],
+  }, BudgetItemRow),
   gameSession: __table({
     name: 'game_session',
     indexes: [
@@ -121,8 +137,11 @@ const tablesSchema = __schema({
 
 /** The schema information for all reducers in this module. This is defined the same way as the reducers would have been defined in the server, except the body of the reducer is omitted in code generation. */
 const reducersSchema = __reducers(
+  __reducerSchema("add_budget_item", AddBudgetItemReducer),
   __reducerSchema("add_guest", AddGuestReducer),
   __reducerSchema("add_todo", AddTodoReducer),
+  __reducerSchema("debug_jwt", DebugJwtReducer),
+  __reducerSchema("delete_budget_item", DeleteBudgetItemReducer),
   __reducerSchema("delete_todo", DeleteTodoReducer),
   __reducerSchema("remove_guest", RemoveGuestReducer),
   __reducerSchema("rename_guest", RenameGuestReducer),
@@ -130,6 +149,7 @@ const reducersSchema = __reducers(
   __reducerSchema("start_game", StartGameReducer),
   __reducerSchema("submit_score", SubmitScoreReducer),
   __reducerSchema("toggle_todo", ToggleTodoReducer),
+  __reducerSchema("update_budget_item", UpdateBudgetItemReducer),
 );
 
 /** The schema information for all procedures in this module. This is defined the same way as the procedures would have been defined in the server. */

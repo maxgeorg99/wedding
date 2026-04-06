@@ -10,6 +10,16 @@ import {
   type Infer as __Infer,
 } from "spacetimedb";
 
+export const BudgetItem = __t.object("BudgetItem", {
+  id: __t.u64(),
+  name: __t.string(),
+  planned: __t.u64(),
+  actual: __t.option(__t.u64()),
+  paid: __t.bool(),
+  createdAt: __t.timestamp(),
+});
+export type BudgetItem = __Infer<typeof BudgetItem>;
+
 export const GameSession = __t.object("GameSession", {
   identity: __t.identity(),
   startedAt: __t.timestamp(),

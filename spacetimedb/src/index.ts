@@ -63,6 +63,20 @@ const spacetimedb = schema({
       createdAt: t.timestamp(),
     }
   ),
+  budgetItem: table(
+    {
+      name: 'budget_item',
+      public: true,
+    },
+    {
+      id: t.u64().primaryKey().autoInc(),
+      name: t.string(),
+      planned: t.u64(),
+      actual: t.u64().optional(),
+      paid: t.bool(),
+      createdAt: t.timestamp(),
+    }
+  ),
 });
 export default spacetimedb;
 
@@ -361,5 +375,43 @@ export const submit_score = spacetimedb.reducer(
       score,
       updatedAt: ctx.timestamp,
     });
+  }
+);
+
+// ===== Budget =====
+
+export const add_budget_item = spacetimedb.reducer(
+  { name: t.string(), planned: t.u64() },
+  (ctx, { name, planned }) => {
+    requirePlanner(ctx);
+    if (!name.trim()) throw new SenderError('Name ist erforderlich');
+    ctx.db.budgetItem.insert({
+      id: 0n,
+      name: name.trim(),
+      planned,
+      actual: undefined,
+      paid: false,
+      createdAt: ctx.timestamp,
+    });
+  }
+);
+
+export const update_budget_item = spacetimedb.reducer(
+  { itemId: t.u64(), name: t.string(), planned: t.u64(), actual: t.option(t.u64()), paid: t.bool() },
+  (ctx, { itemId, name, planned, actual, paid }) => {
+    requirePlanner(ctx);
+    const item = ctx.db.budgetItem.id.find(itemId);
+    if (!item) throw new SenderError('Posten nicht gefunden');
+    ctx.db.budgetItem.id.update({ ...item, name: name.trim(), planned, actual: actual ?? undefined, paid });
+  }
+);
+
+export const delete_budget_item = spacetimedb.reducer(
+  { itemId: t.u64() },
+  (ctx, { itemId }) => {
+    requirePlanner(ctx);
+    const item = ctx.db.budgetItem.id.find(itemId);
+    if (!item) throw new SenderError('Posten nicht gefunden');
+    ctx.db.budgetItem.id.delete(itemId);
   }
 );
