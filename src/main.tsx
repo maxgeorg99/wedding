@@ -21,7 +21,7 @@ const onConnect = (conn: DbConnection, identity: Identity, token: string) => {
   conn.subscriptionBuilder()
     .onApplied(() => console.log('Subscription applied'))
     .onError((e) => console.error('Subscription error:', e))
-    .subscribe(['SELECT * FROM guest', 'SELECT * FROM heart_score', 'SELECT * FROM game_session', 'SELECT * FROM wedding_todo', 'SELECT * FROM unclaimed_guests']);
+    .subscribe(['SELECT * FROM guest', 'SELECT * FROM heart_score', 'SELECT * FROM game_session', 'SELECT * FROM wedding_todo', 'SELECT * FROM unclaimed_guests', 'SELECT * FROM timeline_entry', 'SELECT * FROM timeline_config']);
 };
 
 const onDisconnect = () => {

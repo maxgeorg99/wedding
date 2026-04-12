@@ -94,6 +94,8 @@ function AuthenticatedPlanner({ idToken, email, onSignOut }: { idToken: string; 
         'SELECT * FROM guest',
         'SELECT * FROM wedding_todo',
         'SELECT * FROM budget_item',
+        'SELECT * FROM timeline_entry',
+        'SELECT * FROM timeline_config',
       ]);
     };
     const onConnectError = (_ctx: ErrorContext, err: Error) => {
@@ -119,6 +121,8 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const [guests] = useTable(tables.guest);
   const [todos] = useTable(tables.weddingTodo);
   const [budgetItems] = useTable(tables.budgetItem);
+  const [timelineEntries] = useTable(tables.timelineEntry);
+  const [timelineConfigs] = useTable(tables.timelineConfig);
   const addTodo = useReducer(reducers.addTodo);
   const toggleTodo = useReducer(reducers.toggleTodo);
   const deleteTodo = useReducer(reducers.deleteTodo);
@@ -128,10 +132,14 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const addBudgetItem = useReducer(reducers.addBudgetItem);
   const updateBudgetItem = useReducer(reducers.updateBudgetItem);
   const deleteBudgetItem = useReducer(reducers.deleteBudgetItem);
+  const addTimelineEntry = useReducer(reducers.addTimelineEntry);
+  const updateTimelineEntry = useReducer(reducers.updateTimelineEntry);
+  const deleteTimelineEntry = useReducer(reducers.deleteTimelineEntry);
+  const toggleTimelineReleased = useReducer(reducers.toggleTimelineReleased);
 
   const [newTodo, setNewTodo] = useState('');
   const [newGuest, setNewGuest] = useState('');
-  const [activeTab, setActiveTab] = useState<'guests' | 'todos' | 'budget'>('guests');
+  const [activeTab, setActiveTab] = useState<'guests' | 'todos' | 'budget' | 'timeline'>('guests');
   const [editingId, setEditingId] = useState<bigint | null>(null);
   const [editingName, setEditingName] = useState('');
   const [guestFilter, setGuestFilter] = useState<'all' | 'attending' | 'declined' | 'pending'>('all');
@@ -139,6 +147,13 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const [newBudgetAmount, setNewBudgetAmount] = useState('');
   const [editingBudgetId, setEditingBudgetId] = useState<bigint | null>(null);
   const [editingBudgetActual, setEditingBudgetActual] = useState('');
+  const [newTimelineTime, setNewTimelineTime] = useState('');
+  const [newTimelineTitle, setNewTimelineTitle] = useState('');
+  const [newTimelineLocation, setNewTimelineLocation] = useState('');
+  const [editingTimelineId, setEditingTimelineId] = useState<bigint | null>(null);
+  const [editingTimelineTime, setEditingTimelineTime] = useState('');
+  const [editingTimelineTitle, setEditingTimelineTitle] = useState('');
+  const [editingTimelineLocation, setEditingTimelineLocation] = useState('');
 
   const sortedTodos = [...todos].sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
@@ -234,6 +249,50 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
     return num.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
   };
 
+  const isTimelineReleased = timelineConfigs.some((c) => c.released);
+  const sortedTimeline = [...timelineEntries].sort((a, b) => a.time.localeCompare(b.time));
+
+  const handleAddTimelineEntry = () => {
+    if (!newTimelineTime.trim() || !newTimelineTitle.trim() || !addTimelineEntry) return;
+    addTimelineEntry({ time: newTimelineTime.trim(), title: newTimelineTitle.trim(), location: newTimelineLocation.trim() || undefined });
+    setNewTimelineTime('');
+    setNewTimelineTitle('');
+    setNewTimelineLocation('');
+  };
+
+  const startEditingTimeline = (entry: (typeof timelineEntries)[number]) => {
+    setEditingTimelineId(entry.id);
+    setEditingTimelineTime(entry.time);
+    setEditingTimelineTitle(entry.title);
+    setEditingTimelineLocation(entry.location ?? '');
+  };
+
+  const handleSaveTimeline = () => {
+    if (!updateTimelineEntry || editingTimelineId === null) return;
+    updateTimelineEntry({ entryId: editingTimelineId, time: editingTimelineTime.trim(), title: editingTimelineTitle.trim(), location: editingTimelineLocation.trim() || undefined });
+    setEditingTimelineId(null);
+  };
+
+  const cancelEditingTimeline = () => {
+    setEditingTimelineId(null);
+  };
+
+  const handleDeleteTimelineEntry = (id: bigint) => {
+    if (!deleteTimelineEntry) return;
+    deleteTimelineEntry({ entryId: id });
+  };
+
+  const handleToggleRelease = () => {
+    if (!toggleTimelineReleased) return;
+    const newState = !isTimelineReleased;
+    const msg = newState
+      ? 'Zeitplan veröffentlichen? Gäste können ihn dann auf der Homepage sehen.'
+      : 'Zeitplan zurückziehen? Gäste sehen dann wieder "wird noch bekannt gegeben".';
+    if (window.confirm(msg)) {
+      toggleTimelineReleased({ released: newState });
+    }
+  };
+
   return (
     <>
       <FallingLeaves />
@@ -288,6 +347,12 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
             onClick={() => setActiveTab('budget')}
           >
             Budget
+          </button>
+          <button
+            className={`planner-tab ${activeTab === 'timeline' ? 'active' : ''}`}
+            onClick={() => setActiveTab('timeline')}
+          >
+            Zeitplan {isTimelineReleased ? '' : '(Entwurf)'}
           </button>
         </div>
 
@@ -441,7 +506,7 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
                 <span>Geplant: {formatEuro(totalPlanned)}</span>
                 <span>Bezahlt: {formatEuro(totalActual)}</span>
                 <span className={remaining < 0n ? 'budget-over' : 'budget-ok'}>
-                  Übrig: {formatEuro(remaining < 0n ? -remaining : remaining)}{remaining < 0n ? ' über Budget!' : ''}
+                  {remaining < 0n ? `${formatEuro(-remaining)} über Budget` : `${formatEuro(remaining)} übrig`}
                 </span>
               </div>
             </div>
@@ -534,6 +599,103 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
                 ))}
               {budgetItems.length === 0 && (
                 <li className="planner-empty">Noch keine Budget-Posten vorhanden.</li>
+              )}
+            </ul>
+          </section>
+        )}
+
+        {/* Timeline Tab */}
+        {activeTab === 'timeline' && (
+          <section className="planner-section">
+            {/* Release toggle */}
+            <div className="timeline-release-bar">
+              <span className={`timeline-status ${isTimelineReleased ? 'released' : 'draft'}`}>
+                {isTimelineReleased ? 'Veröffentlicht' : 'Entwurf'}
+              </span>
+              <button onClick={handleToggleRelease} className={`timeline-release-btn ${isTimelineReleased ? 'retract' : ''}`}>
+                {isTimelineReleased ? 'Zurückziehen' : 'Veröffentlichen'}
+              </button>
+            </div>
+
+            {/* Add timeline entry */}
+            <div className="planner-add-row timeline-add-row">
+              <input
+                type="text"
+                value={newTimelineTime}
+                onChange={(e) => setNewTimelineTime(e.target.value)}
+                placeholder="Uhrzeit"
+                className="planner-input timeline-time-input"
+              />
+              <input
+                type="text"
+                value={newTimelineTitle}
+                onChange={(e) => setNewTimelineTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddTimelineEntry()}
+                placeholder="Programmpunkt"
+                className="planner-input"
+              />
+              <input
+                type="text"
+                value={newTimelineLocation}
+                onChange={(e) => setNewTimelineLocation(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddTimelineEntry()}
+                placeholder="Ort (optional)"
+                className="planner-input timeline-location-input"
+              />
+              <button onClick={handleAddTimelineEntry} className="planner-add-btn">+</button>
+            </div>
+
+            {/* Timeline entries */}
+            <ul className="timeline-editor-list">
+              {sortedTimeline.map((entry) => (
+                <li key={entry.id.toString()} className="timeline-editor-item">
+                  {editingTimelineId === entry.id ? (
+                    <div className="timeline-edit-row">
+                      <input
+                        type="text"
+                        value={editingTimelineTime}
+                        onChange={(e) => setEditingTimelineTime(e.target.value)}
+                        className="planner-input timeline-time-input"
+                        autoFocus
+                      />
+                      <input
+                        type="text"
+                        value={editingTimelineTitle}
+                        onChange={(e) => setEditingTimelineTitle(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSaveTimeline();
+                          if (e.key === 'Escape') cancelEditingTimeline();
+                        }}
+                        className="planner-input"
+                      />
+                      <input
+                        type="text"
+                        value={editingTimelineLocation}
+                        onChange={(e) => setEditingTimelineLocation(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSaveTimeline();
+                          if (e.key === 'Escape') cancelEditingTimeline();
+                        }}
+                        placeholder="Ort (optional)"
+                        className="planner-input timeline-location-input"
+                      />
+                      <button onClick={handleSaveTimeline} className="planner-add-btn timeline-save-btn">Speichern</button>
+                      <button onClick={cancelEditingTimeline} className="planner-delete-btn">&times;</button>
+                    </div>
+                  ) : (
+                    <div className="timeline-display-row">
+                      <span className="timeline-editor-time">{entry.time}</span>
+                      <div className="timeline-editor-info" onClick={() => startEditingTimeline(entry)} title="Klicken zum Bearbeiten">
+                        <span className="timeline-editor-title">{entry.title}</span>
+                        {entry.location && <span className="timeline-editor-location">{entry.location}</span>}
+                      </div>
+                      <button onClick={() => handleDeleteTimelineEntry(entry.id)} className="planner-delete-btn" title="Eintrag löschen">&times;</button>
+                    </div>
+                  )}
+                </li>
+              ))}
+              {timelineEntries.length === 0 && (
+                <li className="planner-empty">Noch keine Zeitplan-Einträge vorhanden.</li>
               )}
             </ul>
           </section>

@@ -308,6 +308,23 @@ h1, h2 {
   color: #6b5744;
 }
 
+.timeline-event-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-location {
+  font-size: 0.78rem;
+  color: #a89279;
+  margin-top: 0.1rem;
+}
+
+.timeline-tbd {
+  color: #8b7355;
+  font-style: italic;
+  padding: 1rem 0;
+}
+
 /* ===== RSVP ===== */
 .rsvp {
   padding: 1rem 0 2rem;
@@ -1133,6 +1150,135 @@ h1, h2 {
   background: #c4956a;
   border-radius: 2px;
   transition: width 0.3s;
+}
+
+/* ===== Timeline Editor (Planner) ===== */
+.timeline-release-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid #e8ddd0;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.timeline-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 10px;
+}
+
+.timeline-status.draft {
+  background: #f5f0eb;
+  color: #8b7355;
+}
+
+.timeline-status.released {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.timeline-release-btn {
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #2e7d32;
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.timeline-release-btn:hover {
+  background: #256d28;
+}
+
+.timeline-release-btn.retract {
+  background: #8b7355;
+}
+
+.timeline-release-btn.retract:hover {
+  background: #73613f;
+}
+
+.timeline-add-row {
+  flex-wrap: wrap;
+}
+
+.timeline-time-input {
+  max-width: 80px;
+  flex: 0 0 auto;
+}
+
+.timeline-location-input {
+  max-width: 140px;
+  flex: 0 0 auto;
+}
+
+.timeline-editor-list {
+  list-style: none;
+}
+
+.timeline-editor-item {
+  background: #fff;
+  border: 1px solid #e8ddd0;
+  border-radius: 8px;
+  margin-bottom: 0.4rem;
+  padding: 0.6rem 0.8rem;
+}
+
+.timeline-display-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.timeline-editor-time {
+  font-weight: 700;
+  color: #5a3e2b;
+  min-width: 50px;
+  flex-shrink: 0;
+}
+
+.timeline-editor-info {
+  flex: 1;
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  transition: border-color 0.2s;
+  min-width: 0;
+}
+
+.timeline-editor-info:hover {
+  border-bottom-color: #c4956a;
+}
+
+.timeline-editor-title {
+  color: #5a3e2b;
+  font-weight: 600;
+}
+
+.timeline-editor-location {
+  display: block;
+  font-size: 0.78rem;
+  color: #a89279;
+  margin-top: 0.1rem;
+}
+
+.timeline-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.timeline-save-btn {
+  width: auto;
+  height: 38px;
+  padding: 0 0.6rem;
+  font-size: 0.75rem;
 }
 
 /* ===== Responsive ===== */

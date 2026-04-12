@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTable } from 'spacetimedb/react';
+import { tables } from './module_bindings/index.ts';
 import './wedding.css';
 import FallingLeaves from './FallingLeaves';
 
@@ -22,6 +24,9 @@ function useCountdown() {
 
 function App() {
   const countdown = useCountdown();
+  const [timelineEntries] = useTable(tables.timelineEntry);
+  const [timelineConfigs] = useTable(tables.timelineConfig);
+  const isTimelineReleased = timelineConfigs.some((c) => c.released);
 
   return (
     <>
@@ -117,11 +122,25 @@ function App() {
         {/* Timeline */}
         <section className="timeline">
           <h2>Zeitplan</h2>
-          <ul className="timeline-list">
-            <li className="timeline-item">
-              <span className="timeline-time">TBD</span>
-            </li>
-          </ul>
+          {isTimelineReleased ? (
+            <ul className="timeline-list">
+              {[...timelineEntries]
+                .sort((a, b) => a.time.localeCompare(b.time))
+                .map((entry) => (
+                  <li key={entry.id.toString()} className="timeline-item">
+                    <span className="timeline-time">{entry.time}</span>
+                    <div className="timeline-event-group">
+                      <span className="timeline-event">{entry.title}</span>
+                      {entry.location && (
+                        <span className="timeline-location">{entry.location}</span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+            </ul>
+          ) : (
+            <p className="timeline-tbd">Der Zeitplan wird noch bekannt gegeben.</p>
+          )}
         </section>
 
         <footer className="wedding-footer">

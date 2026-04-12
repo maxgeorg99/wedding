@@ -8,29 +8,37 @@ import { type Infer as __Infer } from "spacetimedb";
 // Import all reducer arg schemas
 import AddBudgetItemReducer from "../add_budget_item_reducer";
 import AddGuestReducer from "../add_guest_reducer";
+import AddTimelineEntryReducer from "../add_timeline_entry_reducer";
 import AddTodoReducer from "../add_todo_reducer";
 import DebugJwtReducer from "../debug_jwt_reducer";
 import DeleteBudgetItemReducer from "../delete_budget_item_reducer";
+import DeleteTimelineEntryReducer from "../delete_timeline_entry_reducer";
 import DeleteTodoReducer from "../delete_todo_reducer";
 import RemoveGuestReducer from "../remove_guest_reducer";
 import RenameGuestReducer from "../rename_guest_reducer";
 import RsvpReducer from "../rsvp_reducer";
 import StartGameReducer from "../start_game_reducer";
 import SubmitScoreReducer from "../submit_score_reducer";
+import ToggleTimelineReleasedReducer from "../toggle_timeline_released_reducer";
 import ToggleTodoReducer from "../toggle_todo_reducer";
 import UpdateBudgetItemReducer from "../update_budget_item_reducer";
+import UpdateTimelineEntryReducer from "../update_timeline_entry_reducer";
 
 export type AddBudgetItemParams = __Infer<typeof AddBudgetItemReducer>;
 export type AddGuestParams = __Infer<typeof AddGuestReducer>;
+export type AddTimelineEntryParams = __Infer<typeof AddTimelineEntryReducer>;
 export type AddTodoParams = __Infer<typeof AddTodoReducer>;
 export type DebugJwtParams = __Infer<typeof DebugJwtReducer>;
 export type DeleteBudgetItemParams = __Infer<typeof DeleteBudgetItemReducer>;
+export type DeleteTimelineEntryParams = __Infer<typeof DeleteTimelineEntryReducer>;
 export type DeleteTodoParams = __Infer<typeof DeleteTodoReducer>;
 export type RemoveGuestParams = __Infer<typeof RemoveGuestReducer>;
 export type RenameGuestParams = __Infer<typeof RenameGuestReducer>;
 export type RsvpParams = __Infer<typeof RsvpReducer>;
 export type StartGameParams = __Infer<typeof StartGameReducer>;
 export type SubmitScoreParams = __Infer<typeof SubmitScoreReducer>;
+export type ToggleTimelineReleasedParams = __Infer<typeof ToggleTimelineReleasedReducer>;
 export type ToggleTodoParams = __Infer<typeof ToggleTodoReducer>;
 export type UpdateBudgetItemParams = __Infer<typeof UpdateBudgetItemReducer>;
+export type UpdateTimelineEntryParams = __Infer<typeof UpdateTimelineEntryReducer>;
 

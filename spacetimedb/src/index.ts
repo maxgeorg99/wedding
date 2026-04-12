@@ -77,6 +77,29 @@ const spacetimedb = schema({
       createdAt: t.timestamp(),
     }
   ),
+  timelineEntry: table(
+    {
+      name: 'timeline_entry',
+      public: true,
+    },
+    {
+      id: t.u64().primaryKey().autoInc(),
+      time: t.string(),
+      title: t.string(),
+      location: t.string().optional(),
+      sortOrder: t.u64(),
+    }
+  ),
+  timelineConfig: table(
+    {
+      name: 'timeline_config',
+      public: true,
+    },
+    {
+      id: t.u64().primaryKey(),
+      released: t.bool(),
+    }
+  ),
 });
 export default spacetimedb;
 
@@ -154,6 +177,17 @@ const SEED_GUESTS = [
   "Anton",
 ];
 
+const SEED_TIMELINE = [
+  { time: '11:00', title: 'Ankommen' },
+  { time: '11:30', title: 'Standesamtliche Trauung' },
+  { time: '12:00', title: 'Sektempfang' },
+  { time: '13:30', title: 'Mittagessen' },
+  { time: '15:00', title: 'Fotoshooting' },
+  { time: '16:00', title: 'Kaffee & Kuchen' },
+  { time: '17:00', title: 'Reden & Spiele' },
+  { time: '19:00', title: 'Brautpaar verabschiedet sich in die Flitterwochen' },
+];
+
 export const init = spacetimedb.init((ctx) => {
   for (const name of SEED_GUESTS) {
     ctx.db.guest.insert({
@@ -167,6 +201,20 @@ export const init = spacetimedb.init((ctx) => {
       createdAt: ctx.timestamp,
     });
   }
+
+  // Seed timeline
+  for (let i = 0; i < SEED_TIMELINE.length; i++) {
+    ctx.db.timelineEntry.insert({
+      id: 0n,
+      time: SEED_TIMELINE[i].time,
+      title: SEED_TIMELINE[i].title,
+      location: undefined,
+      sortOrder: BigInt(i),
+    });
+  }
+
+  // Timeline not released by default
+  ctx.db.timelineConfig.insert({ id: 0n, released: false });
 });
 
 // TEMPORARY — remove after checking JWT claims
@@ -413,5 +461,56 @@ export const delete_budget_item = spacetimedb.reducer(
     const item = ctx.db.budgetItem.id.find(itemId);
     if (!item) throw new SenderError('Posten nicht gefunden');
     ctx.db.budgetItem.id.delete(itemId);
+  }
+);
+
+// ===== Timeline =====
+
+export const add_timeline_entry = spacetimedb.reducer(
+  { time: t.string(), title: t.string(), location: t.option(t.string()) },
+  (ctx, { time, title, location }) => {
+    requirePlanner(ctx);
+    if (!time.trim() || !title.trim()) throw new SenderError('Zeit und Titel sind erforderlich');
+    let maxOrder = 0n;
+    for (const entry of ctx.db.timelineEntry.iter()) {
+      if (entry.sortOrder > maxOrder) maxOrder = entry.sortOrder;
+    }
+    ctx.db.timelineEntry.insert({
+      id: 0n,
+      time: time.trim(),
+      title: title.trim(),
+      location: location?.trim() || undefined,
+      sortOrder: maxOrder + 1n,
+    });
+  }
+);
+
+export const update_timeline_entry = spacetimedb.reducer(
+  { entryId: t.u64(), time: t.string(), title: t.string(), location: t.option(t.string()) },
+  (ctx, { entryId, time, title, location }) => {
+    requirePlanner(ctx);
+    const entry = ctx.db.timelineEntry.id.find(entryId);
+    if (!entry) throw new SenderError('Eintrag nicht gefunden');
+    ctx.db.timelineEntry.id.update({ ...entry, time: time.trim(), title: title.trim(), location: location?.trim() || undefined });
+  }
+);
+
+export const delete_timeline_entry = spacetimedb.reducer(
+  { entryId: t.u64() },
+  (ctx, { entryId }) => {
+    requirePlanner(ctx);
+    const entry = ctx.db.timelineEntry.id.find(entryId);
+    if (!entry) throw new SenderError('Eintrag nicht gefunden');
+    ctx.db.timelineEntry.id.delete(entryId);
+  }
+);
+
+export const toggle_timeline_released = spacetimedb.reducer(
+  { released: t.bool() },
+  (ctx, { released }) => {
+    requirePlanner(ctx);
+    const config = ctx.db.timelineConfig.id.find(0n);
+    if (!config) throw new SenderError('Timeline-Config nicht gefunden');
+    ctx.db.timelineConfig.id.update({ ...config, released });
   }
 );

@@ -46,6 +46,21 @@ export const HeartScore = __t.object("HeartScore", {
 });
 export type HeartScore = __Infer<typeof HeartScore>;
 
+export const TimelineConfig = __t.object("TimelineConfig", {
+  id: __t.u64(),
+  released: __t.bool(),
+});
+export type TimelineConfig = __Infer<typeof TimelineConfig>;
+
+export const TimelineEntry = __t.object("TimelineEntry", {
+  id: __t.u64(),
+  time: __t.string(),
+  title: __t.string(),
+  location: __t.option(__t.string()),
+  sortOrder: __t.u64(),
+});
+export type TimelineEntry = __Infer<typeof TimelineEntry>;
+
 export const UnclaimedGuests = __t.object("UnclaimedGuests", {});
 export type UnclaimedGuests = __Infer<typeof UnclaimedGuests>;
 

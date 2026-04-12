@@ -36,17 +36,21 @@ import {
 // Import all reducer arg schemas
 import AddBudgetItemReducer from "./add_budget_item_reducer";
 import AddGuestReducer from "./add_guest_reducer";
+import AddTimelineEntryReducer from "./add_timeline_entry_reducer";
 import AddTodoReducer from "./add_todo_reducer";
 import DebugJwtReducer from "./debug_jwt_reducer";
 import DeleteBudgetItemReducer from "./delete_budget_item_reducer";
+import DeleteTimelineEntryReducer from "./delete_timeline_entry_reducer";
 import DeleteTodoReducer from "./delete_todo_reducer";
 import RemoveGuestReducer from "./remove_guest_reducer";
 import RenameGuestReducer from "./rename_guest_reducer";
 import RsvpReducer from "./rsvp_reducer";
 import StartGameReducer from "./start_game_reducer";
 import SubmitScoreReducer from "./submit_score_reducer";
+import ToggleTimelineReleasedReducer from "./toggle_timeline_released_reducer";
 import ToggleTodoReducer from "./toggle_todo_reducer";
 import UpdateBudgetItemReducer from "./update_budget_item_reducer";
+import UpdateTimelineEntryReducer from "./update_timeline_entry_reducer";
 
 // Import all procedure arg schemas
 
@@ -55,6 +59,8 @@ import BudgetItemRow from "./budget_item_table";
 import GameSessionRow from "./game_session_table";
 import GuestRow from "./guest_table";
 import HeartScoreRow from "./heart_score_table";
+import TimelineConfigRow from "./timeline_config_table";
+import TimelineEntryRow from "./timeline_entry_table";
 import UnclaimedGuestsRow from "./unclaimed_guests_table";
 import WeddingTodoRow from "./wedding_todo_table";
 
@@ -115,6 +121,28 @@ const tablesSchema = __schema({
       { name: 'heart_score_id_key', constraint: 'unique', columns: ['id'] },
     ],
   }, HeartScoreRow),
+  timelineConfig: __table({
+    name: 'timeline_config',
+    indexes: [
+      { accessor: 'id', name: 'timeline_config_id_idx_btree', algorithm: 'btree', columns: [
+        'id',
+      ] },
+    ],
+    constraints: [
+      { name: 'timeline_config_id_key', constraint: 'unique', columns: ['id'] },
+    ],
+  }, TimelineConfigRow),
+  timelineEntry: __table({
+    name: 'timeline_entry',
+    indexes: [
+      { accessor: 'id', name: 'timeline_entry_id_idx_btree', algorithm: 'btree', columns: [
+        'id',
+      ] },
+    ],
+    constraints: [
+      { name: 'timeline_entry_id_key', constraint: 'unique', columns: ['id'] },
+    ],
+  }, TimelineEntryRow),
   weddingTodo: __table({
     name: 'wedding_todo',
     indexes: [
@@ -139,17 +167,21 @@ const tablesSchema = __schema({
 const reducersSchema = __reducers(
   __reducerSchema("add_budget_item", AddBudgetItemReducer),
   __reducerSchema("add_guest", AddGuestReducer),
+  __reducerSchema("add_timeline_entry", AddTimelineEntryReducer),
   __reducerSchema("add_todo", AddTodoReducer),
   __reducerSchema("debug_jwt", DebugJwtReducer),
   __reducerSchema("delete_budget_item", DeleteBudgetItemReducer),
+  __reducerSchema("delete_timeline_entry", DeleteTimelineEntryReducer),
   __reducerSchema("delete_todo", DeleteTodoReducer),
   __reducerSchema("remove_guest", RemoveGuestReducer),
   __reducerSchema("rename_guest", RenameGuestReducer),
   __reducerSchema("rsvp", RsvpReducer),
   __reducerSchema("start_game", StartGameReducer),
   __reducerSchema("submit_score", SubmitScoreReducer),
+  __reducerSchema("toggle_timeline_released", ToggleTimelineReleasedReducer),
   __reducerSchema("toggle_todo", ToggleTodoReducer),
   __reducerSchema("update_budget_item", UpdateBudgetItemReducer),
+  __reducerSchema("update_timeline_entry", UpdateTimelineEntryReducer),
 );
 
 /** The schema information for all procedures in this module. This is defined the same way as the procedures would have been defined in the server. */
