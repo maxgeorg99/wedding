@@ -510,7 +510,10 @@ export const toggle_timeline_released = spacetimedb.reducer(
   (ctx, { released }) => {
     requirePlanner(ctx);
     const config = ctx.db.timelineConfig.id.find(0n);
-    if (!config) throw new SenderError('Timeline-Config nicht gefunden');
-    ctx.db.timelineConfig.id.update({ ...config, released });
+    if (config) {
+      ctx.db.timelineConfig.id.update({ ...config, released });
+    } else {
+      ctx.db.timelineConfig.insert({ id: 0n, released });
+    }
   }
 );
