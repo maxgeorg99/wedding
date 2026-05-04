@@ -248,12 +248,23 @@ function App() {
           </div>
           <div className="faq-item">
             <p className="faq-question">Gibt es Parkplätze vor Ort?</p>
-            <p className="faq-answer">Ja, vor der Location stehen Parkplätze zur Verfügung.</p>
+            <p className="faq-answer">
+              Ja, vor der Location stehen Parkplätze zur Verfügung.
+            </p>
           </div>
           <div className="faq-item">
             <p className="faq-question">Gibt es Hotels in der Nähe?</p>
             <p className="faq-answer">
-              In Rüppurr und der Umgebung sind ausreichend Hotels und Pensionen buchbar.
+              In Rüppurr gibt es nur wenige Hotels, mit der S1 kann man nach
+              Karlsruhe rein fahren und z.B. im Santos oder Novotel übernachten.
+            </p>
+          </div>
+          <div className="faq-item">
+            <p className="faq-question">Was wünscht Ihr euch?</p>
+            <p className="faq-answer">
+              Da wir bereits einen gemeinsamen Haushalt führen und alles haben,
+              was wir zum Leben brauchen, wünschen wir uns statt Geschenken eine
+              kleine finanzielle Unterstützung für unsere gemeinsamen Träume.
             </p>
           </div>
         </section>
