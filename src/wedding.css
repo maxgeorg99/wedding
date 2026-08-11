@@ -1076,6 +1076,22 @@ h1, h2 {
   min-width: 0;
 }
 
+.planner-dietary-edit-input {
+  flex: 0 1 auto;
+  max-width: 200px;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.4rem;
+}
+
+.planner-guest-tag-editable {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.planner-guest-tag-editable:hover {
+  opacity: 0.7;
+}
+
 .planner-delete-btn {
   background: none;
   border: none;

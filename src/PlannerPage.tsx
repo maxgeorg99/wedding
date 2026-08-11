@@ -129,6 +129,7 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const addGuest = useReducer(reducers.addGuest);
   const removeGuest = useReducer(reducers.removeGuest);
   const renameGuest = useReducer(reducers.renameGuest);
+  const setDietaryNotes = useReducer(reducers.setDietaryNotes);
   const addBudgetItem = useReducer(reducers.addBudgetItem);
   const updateBudgetItem = useReducer(reducers.updateBudgetItem);
   const deleteBudgetItem = useReducer(reducers.deleteBudgetItem);
@@ -142,6 +143,8 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const [activeTab, setActiveTab] = useState<'guests' | 'todos' | 'budget' | 'timeline'>('guests');
   const [editingId, setEditingId] = useState<bigint | null>(null);
   const [editingName, setEditingName] = useState('');
+  const [editingDietaryId, setEditingDietaryId] = useState<bigint | null>(null);
+  const [editingDietaryNotes, setEditingDietaryNotes] = useState('');
   const [guestFilter, setGuestFilter] = useState<'all' | 'attending' | 'declined' | 'pending'>('all');
   const [dietaryFilter, setDietaryFilter] = useState<string | null>(null);
   const [newBudgetName, setNewBudgetName] = useState('');
@@ -221,6 +224,23 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const cancelEditing = () => {
     setEditingId(null);
     setEditingName('');
+  };
+
+  const startEditingDietary = (id: bigint, notes: string) => {
+    setEditingDietaryId(id);
+    setEditingDietaryNotes(notes);
+  };
+
+  const handleDietaryNotes = () => {
+    if (!setDietaryNotes || editingDietaryId === null) return;
+    setDietaryNotes({ guestId: editingDietaryId, dietaryNotes: editingDietaryNotes.trim() || undefined });
+    setEditingDietaryId(null);
+    setEditingDietaryNotes('');
+  };
+
+  const cancelEditingDietary = () => {
+    setEditingDietaryId(null);
+    setEditingDietaryNotes('');
   };
 
   const TOTAL_BUDGET = 1_000_000n; // 10.000 € in cents
@@ -456,9 +476,28 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
                       {guest.plusOne && (
                         <span className="planner-guest-tag">+1{guest.plusOneName ? `: ${guest.plusOneName}` : ''}</span>
                       )}
-                      {guest.dietaryNotes && (
-                        <span className="planner-guest-tag">{guest.dietaryNotes}</span>
-                      )}
+                      {editingDietaryId === guest.id ? (
+                        <input
+                          type="text"
+                          value={editingDietaryNotes}
+                          onChange={(e) => setEditingDietaryNotes(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleDietaryNotes();
+                            if (e.key === 'Escape') cancelEditingDietary();
+                          }}
+                          onBlur={handleDietaryNotes}
+                          autoFocus
+                          className="planner-input planner-edit-input planner-dietary-edit-input"
+                        />
+                      ) : guest.dietaryNotes ? (
+                        <span
+                          className="planner-guest-tag planner-guest-tag-editable"
+                          onClick={() => startEditingDietary(guest.id, guest.dietaryNotes!)}
+                          title="Klicken zum Bearbeiten"
+                        >
+                          {guest.dietaryNotes}
+                        </span>
+                      ) : null}
                     </div>
                     <button
                       onClick={() => handleRemoveGuest(guest.id)}

@@ -278,6 +278,16 @@ export const rsvp = spacetimedb.reducer(
   }
 );
 
+export const set_dietary_notes = spacetimedb.reducer(
+  { guestId: t.u64(), dietaryNotes: t.option(t.string()) },
+  (ctx, { guestId, dietaryNotes }) => {
+    requirePlanner(ctx);
+    const g = ctx.db.guest.id.find(guestId);
+    if (!g) throw new SenderError('Guest not found');
+    ctx.db.guest.id.update({ ...g, dietaryNotes: dietaryNotes ?? undefined });
+  }
+);
+
 export const remove_guest = spacetimedb.reducer(
   { guestId: t.u64() },
   (ctx, { guestId }) => {

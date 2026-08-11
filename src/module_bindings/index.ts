@@ -44,6 +44,7 @@ import DeleteTimelineEntryReducer from "./delete_timeline_entry_reducer";
 import DeleteTodoReducer from "./delete_todo_reducer";
 import RemoveGuestReducer from "./remove_guest_reducer";
 import RenameGuestReducer from "./rename_guest_reducer";
+import SetDietaryNotesReducer from "./set_dietary_notes_reducer";
 import RsvpReducer from "./rsvp_reducer";
 import StartGameReducer from "./start_game_reducer";
 import SubmitScoreReducer from "./submit_score_reducer";
@@ -175,6 +176,7 @@ const reducersSchema = __reducers(
   __reducerSchema("delete_todo", DeleteTodoReducer),
   __reducerSchema("remove_guest", RemoveGuestReducer),
   __reducerSchema("rename_guest", RenameGuestReducer),
+  __reducerSchema("set_dietary_notes", SetDietaryNotesReducer),
   __reducerSchema("rsvp", RsvpReducer),
   __reducerSchema("start_game", StartGameReducer),
   __reducerSchema("submit_score", SubmitScoreReducer),
