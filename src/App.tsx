@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useTable } from 'spacetimedb/react';
-import { tables } from './module_bindings/index.ts';
-import './wedding.css';
-import FallingLeaves from './FallingLeaves';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useTable } from "spacetimedb/react";
+import { tables } from "./module_bindings/index.ts";
+import "./wedding.css";
+import FallingLeaves from "./FallingLeaves";
 
-const WEDDING_DATE = new Date('2026-10-10T14:00:00');
+const WEDDING_DATE = new Date("2026-10-10T14:00:00");
 
 type Venue = {
   name: string;
@@ -18,39 +18,40 @@ type Venue = {
 
 const VENUES: Venue[] = [
   {
-    name: 'Buhlsche Mühle',
-    address: 'Pforzheimer Str. 68, Ettlingen',
-    url: 'https://www.buhlsche-muehle.de/',
-    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Buhlsche+M%C3%BChle+Ettlingen',
+    name: "Buhlsche Mühle",
+    address: "Pforzheimer Str. 68, Ettlingen",
+    url: "https://www.buhlsche-muehle.de/",
+    mapsUrl:
+      "https://www.google.com/maps/search/?api=1&query=Buhlsche+M%C3%BChle+Ettlingen",
     images: [
-      'https://image.bridebook.com/weddingsuppliers/venue/deqgOMmM8p/35ee6186-3997-4ddd-b09e-0b666270160e.jpg/dpr=1,fit=cover,g=face,w=500,h=333',
-      'https://image.bridebook.com/weddingsuppliers/venue/deqgOMmM8p/Standesamt2025.jpg/dpr=1,fit=pad,g=face,w=720,h=514',
+      "https://image.bridebook.com/weddingsuppliers/venue/deqgOMmM8p/35ee6186-3997-4ddd-b09e-0b666270160e.jpg/dpr=1,fit=cover,g=face,w=500,h=333",
+      "https://image.bridebook.com/weddingsuppliers/venue/deqgOMmM8p/Standesamt2025.jpg/dpr=1,fit=pad,g=face,w=720,h=514",
     ],
-    imageCredit: 'bridebook.com',
+    imageCredit: "bridebook.com",
   },
   {
-    name: 'Lillehus',
-    address: 'Horbachstraße 2, Ettlingen',
-    url: 'https://lillehuscafe.de/',
-    mapsUrl: 'https://maps.app.goo.gl/WeLanSrJqbRtMKWT8',
+    name: "Lillehus",
+    address: "Horbachstraße 2, Ettlingen",
+    url: "https://lillehuscafe.de/",
+    mapsUrl: "https://maps.app.goo.gl/WeLanSrJqbRtMKWT8",
     images: [
-      'https://lillehuscafe.de/app/webp-express/webp-images/uploads/bilder/sonstiges/jobs/gebaeude/dsc6832-1536x1024.jpg.webp',
-      'https://lillehuscafe.de/app/uploads/bilder/gebaeude/Innen-scaled-2048x1366.jpg',
-      'https://lillehuscafe.de/app/uploads/lillehus-header-1.webp?x57397',
+      "https://lillehuscafe.de/app/webp-express/webp-images/uploads/bilder/sonstiges/jobs/gebaeude/dsc6832-1536x1024.jpg.webp",
+      "https://lillehuscafe.de/app/uploads/bilder/gebaeude/Innen-scaled-2048x1366.jpg",
+      "https://lillehuscafe.de/app/uploads/lillehus-header-1.webp?x57397",
     ],
-    imageCredit: 'lillehuscafe.de',
+    imageCredit: "lillehuscafe.de",
   },
   {
-    name: 'Taqueria Taol',
-    address: 'Lange Str. 1, Rüppurr',
-    url: 'https://www.taqueria-taol.de/',
-    mapsUrl: 'https://maps.app.goo.gl/9dcLrbRX6nGJKLVT6',
+    name: "Taqueria Taol",
+    address: "Lange Str. 1, Rüppurr",
+    url: "https://www.taqueria-taol.de/",
+    mapsUrl: "https://maps.app.goo.gl/9dcLrbRX6nGJKLVT6",
     images: [
-      'https://static.wixstatic.com/media/6f7c92_826595dcbbc34cd3b2c90ec1c6c0e928~mv2.jpg/v1/fill/w_1722,h_1960,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/6f7c92_826595dcbbc34cd3b2c90ec1c6c0e928~mv2.jpg',
-      'https://static.wixstatic.com/media/6f7c92_9910910dcc6d479eb4977c2f85814289~mv2.jpg/v1/fill/w_561,h_1920,al_c,q_85,enc_avif,quality_auto/6f7c92_9910910dcc6d479eb4977c2f85814289~mv2.jpg',
-      'https://static.wixstatic.com/media/6f7c92_e138270a54154f13acb906bde715ee09~mv2.jpg/v1/fill/w_980,h_1124,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/6f7c92_e138270a54154f13acb906bde715ee09~mv2.jpg',
+      "https://static.wixstatic.com/media/6f7c92_826595dcbbc34cd3b2c90ec1c6c0e928~mv2.jpg/v1/fill/w_1722,h_1960,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/6f7c92_826595dcbbc34cd3b2c90ec1c6c0e928~mv2.jpg",
+      "https://static.wixstatic.com/media/6f7c92_9910910dcc6d479eb4977c2f85814289~mv2.jpg/v1/fill/w_561,h_1920,al_c,q_85,enc_avif,quality_auto/6f7c92_9910910dcc6d479eb4977c2f85814289~mv2.jpg",
+      "https://static.wixstatic.com/media/6f7c92_e138270a54154f13acb906bde715ee09~mv2.jpg/v1/fill/w_980,h_1124,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/6f7c92_e138270a54154f13acb906bde715ee09~mv2.jpg",
     ],
-    imageCredit: 'taqueria-taol.de',
+    imageCredit: "taqueria-taol.de",
   },
 ];
 
@@ -90,7 +91,7 @@ function VenueCarousel({ images, name }: { images: string[]; name: string }) {
               <button
                 key={i}
                 type="button"
-                className={`venue-carousel-dot${i === index ? ' is-active' : ''}`}
+                className={`venue-carousel-dot${i === index ? " is-active" : ""}`}
                 aria-label={`Bild ${i + 1}`}
                 aria-selected={i === index}
                 onClick={() => go(i)}
@@ -155,7 +156,9 @@ function App() {
             </div>
           </div>
           <p className="hero-venue">Buhlsche Mühle, Ettlingen, DE</p>
-          <Link to="/rsvp" className="rsvp-button">Zu-/Absagen</Link>
+          <Link to="/rsvp" className="rsvp-button">
+            Zu-/Absagen
+          </Link>
         </section>
 
         <hr className="section-divider" />
@@ -163,8 +166,16 @@ function App() {
         {/* Personal Note */}
         <section className="personal-note">
           <div className="couple-photos">
-            <img src="/img-1.jpeg" alt="Claudia & Maximilian" className="couple-photo" />
-            <img src="/img-2.jpeg" alt="Claudia & Maximilian" className="couple-photo" />
+            <img
+              src="/img-1.jpeg"
+              alt="Claudia & Maximilian"
+              className="couple-photo"
+            />
+            <img
+              src="/img-2.jpeg"
+              alt="Claudia & Maximilian"
+              className="couple-photo"
+            />
           </div>
           <p>
             Nach 10 wundervollen gemeinsamen Jahren möchten wir unsere Liebe an
@@ -178,23 +189,27 @@ function App() {
         <section className="timeline">
           <h2>Zeitplan</h2>
           {isTimelineReleased ? (
-              <ul className="timeline-list">
-                {[...timelineEntries]
-                    .sort((a, b) => a.time.localeCompare(b.time))
-                    .map((entry) => (
-                        <li key={entry.id.toString()} className="timeline-item">
-                          <span className="timeline-time">{entry.time}</span>
-                          <div className="timeline-event-group">
-                            <span className="timeline-event">{entry.title}</span>
-                            {entry.location && (
-                                <span className="timeline-location">{entry.location}</span>
-                            )}
-                          </div>
-                        </li>
-                    ))}
-              </ul>
+            <ul className="timeline-list">
+              {[...timelineEntries]
+                .sort((a, b) => a.time.localeCompare(b.time))
+                .map((entry) => (
+                  <li key={entry.id.toString()} className="timeline-item">
+                    <span className="timeline-time">{entry.time}</span>
+                    <div className="timeline-event-group">
+                      <span className="timeline-event">{entry.title}</span>
+                      {entry.location && (
+                        <span className="timeline-location">
+                          {entry.location}
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+            </ul>
           ) : (
-              <p className="timeline-tbd">Der Zeitplan wird noch bekannt gegeben.</p>
+            <p className="timeline-tbd">
+              Der Zeitplan wird noch bekannt gegeben.
+            </p>
           )}
         </section>
 
@@ -232,8 +247,8 @@ function App() {
             ))}
           </div>
           <p className="venue-disclaimer">
-            Vorschau-Bilder dienen nur der Information. Alle Bildrechte liegen bei
-            den jeweiligen Betreibern der verlinkten Websites.
+            Vorschau-Bilder dienen nur der Information. Alle Bildrechte liegen
+            bei den jeweiligen Betreibern der verlinkten Websites.
           </p>
         </section>
 
@@ -265,6 +280,7 @@ function App() {
               Da wir bereits einen gemeinsamen Haushalt führen und alles haben,
               was wir zum Leben brauchen, wünschen wir uns statt Geschenken eine
               kleine finanzielle Unterstützung für unsere gemeinsamen Träume.
+              IBAN: DE65 1203 0000 1082 8815 49
             </p>
           </div>
         </section>

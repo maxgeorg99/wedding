@@ -143,6 +143,7 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const [editingId, setEditingId] = useState<bigint | null>(null);
   const [editingName, setEditingName] = useState('');
   const [guestFilter, setGuestFilter] = useState<'all' | 'attending' | 'declined' | 'pending'>('all');
+  const [dietaryFilter, setDietaryFilter] = useState<string | null>(null);
   const [newBudgetName, setNewBudgetName] = useState('');
   const [newBudgetAmount, setNewBudgetAmount] = useState('');
   const [editingBudgetId, setEditingBudgetId] = useState<bigint | null>(null);
@@ -162,6 +163,21 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
 
   const attending = guests.filter((g) => g.attending);
   const plusOnes = guests.filter((g) => g.plusOne);
+
+  const dietaryCategories = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const g of guests) {
+      if (!g.dietaryNotes) continue;
+      const tokens = g.dietaryNotes
+        .split(/[,;/]|\bund\b|\n/)
+        .map((t) => t.trim().toLowerCase())
+        .filter((t) => t.length > 0);
+      for (const token of tokens) {
+        counts[token] = (counts[token] || 0) + 1;
+      }
+    }
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [guests]);
 
   const handleAddTodo = () => {
     if (!newTodo.trim() || !addTodo) return;
@@ -375,15 +391,32 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
                 <button
                   key={f}
                   className={`planner-filter-btn ${guestFilter === f ? 'active' : ''}`}
-                  onClick={() => setGuestFilter(f)}
+                  onClick={() => { setGuestFilter(f); setDietaryFilter(null); }}
                 >
                   {{ all: 'Alle', attending: 'Zugesagt', declined: 'Abgesagt', pending: 'Offen' }[f]}
                 </button>
               ))}
             </div>
+            {dietaryCategories.length > 0 && (
+              <div className="planner-filter-row">
+                {dietaryCategories.map(([cat, count]) => (
+                  <button
+                    key={cat}
+                    className={`planner-filter-btn ${dietaryFilter === cat ? 'active' : ''}`}
+                    onClick={() => {
+                      setDietaryFilter(dietaryFilter === cat ? null : cat);
+                      setGuestFilter('all');
+                    }}
+                  >
+                    {cat} ({count})
+                  </button>
+                ))}
+              </div>
+            )}
             <ul className="planner-guest-list">
               {[...guests]
                 .filter((g) => {
+                  if (dietaryFilter && (!g.dietaryNotes || !g.dietaryNotes.toLowerCase().includes(dietaryFilter))) return false;
                   if (guestFilter === 'attending') return g.attending;
                   if (guestFilter === 'declined') return !g.attending && !!g.claimedBy;
                   if (guestFilter === 'pending') return !g.attending && !g.claimedBy;
