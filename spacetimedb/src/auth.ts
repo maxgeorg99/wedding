@@ -5,6 +5,7 @@ const ALLOWED_PLANNER_SUBS = [
 
   'b16be493-ecb5-49c3-9a6b-7629326478e3', // Max Notebook
   '55aad1a3-77b4-42db-aba6-56a413111021', // Max Handy
+  '1a493e13-7a67-4351-8c2a-5cde341a0e6c', // Max (current)
   '1c096145-1504-4fcd-9230-8af01b5fddf6', // claudiahahn00@gmail.com
 ];
 
