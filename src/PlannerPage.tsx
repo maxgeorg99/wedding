@@ -889,71 +889,80 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
                       </div>
                     </div>
 
-                    {isSelected && (
-                      <div className="photo-group-details">
-                        <div className="photo-group-guests">
-                          {groupGuests.map((guest) => {
+                    {/* Guest list - always visible */}
+                    <div className={`photo-group-details ${isSelected ? 'editable' : 'readonly'}`}>
+                      <div className="photo-group-guests">
+                        {groupGuests.length === 0 ? (
+                          <p className="photo-group-guests-empty">Keine Gäste</p>
+                        ) : (
+                          groupGuests.map((guest) => {
                             const member = members.find((m) => m.guestId === guest!.id);
                             return (
                               <div key={guest!.id.toString()} className="photo-group-guest">
                                 <span>{guest!.name}</span>
-                                <button
-                                  onClick={() => {
-                                    if (member && removeGuestFromPhotoGroup) {
-                                      removeGuestFromPhotoGroup({ memberId: member.id });
-                                    }
-                                  }}
-                                  className="planner-delete-btn"
-                                  title="Aus Gruppe entfernen"
-                                >
-                                  ×
-                                </button>
+                                {isSelected && (
+                                  <button
+                                    onClick={() => {
+                                      if (member && removeGuestFromPhotoGroup) {
+                                        removeGuestFromPhotoGroup({ memberId: member.id });
+                                      }
+                                    }}
+                                    className="planner-delete-btn"
+                                    title="Aus Gruppe entfernen"
+                                  >
+                                    ×
+                                  </button>
+                                )}
                               </div>
                             );
-                          })}
-                        </div>
-
-                        {addingGuestToGroupId === group.id ? (
-                          <div className="photo-group-add-guest">
-                            <select
-                              onChange={(e) => {
-                                const guestId = BigInt(e.target.value);
-                                if (addGuestToPhotoGroup) {
-                                  addGuestToPhotoGroup({ groupId: group.id, guestId });
-                                  setAddingGuestToGroupId(null);
-                                }
-                              }}
-                              className="planner-input"
-                              defaultValue=""
-                            >
-                              <option value="">Gast auswählen...</option>
-                              {guests
-                                .filter((g) => !members.some((m) => m.guestId === g.id))
-                                .sort((a, b) => a.name.localeCompare(b.name))
-                                .map((guest) => (
-                                  <option key={guest.id.toString()} value={guest.id.toString()}>
-                                    {guest.name}
-                                  </option>
-                                ))}
-                            </select>
-                            <button
-                              onClick={() => setAddingGuestToGroupId(null)}
-                              className="planner-delete-btn"
-                              title="Abbrechen"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => setAddingGuestToGroupId(group.id)}
-                            className="planner-add-btn photo-group-add-btn"
-                          >
-                            Gast hinzufügen
-                          </button>
+                          })
                         )}
                       </div>
-                    )}
+
+                      {isSelected && (
+                        <>
+                          {addingGuestToGroupId === group.id ? (
+                            <div className="photo-group-add-guest">
+                              <select
+                                onChange={(e) => {
+                                  const guestId = BigInt(e.target.value);
+                                  if (addGuestToPhotoGroup) {
+                                    addGuestToPhotoGroup({ groupId: group.id, guestId });
+                                    setAddingGuestToGroupId(null);
+                                  }
+                                }}
+                                className="planner-input"
+                                defaultValue=""
+                              >
+                                <option value="">Gast auswählen...</option>
+                                {guests
+                                  .filter((g) => !members.some((m) => m.guestId === g.id))
+                                  .sort((a, b) => a.name.localeCompare(b.name))
+                                  .map((guest) => (
+                                    <option key={guest.id.toString()} value={guest.id.toString()}>
+                                      {guest.name}
+                                    </option>
+                                  ))}
+                              </select>
+                              <button
+                                onClick={() => setAddingGuestToGroupId(null)}
+                                className="planner-delete-btn"
+                                title="Abbrechen"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setAddingGuestToGroupId(group.id)}
+                              className="planner-add-btn photo-group-add-btn"
+                            >
+                              Gast hinzufügen
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 );
               })}
