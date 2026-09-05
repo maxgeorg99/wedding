@@ -46,6 +46,21 @@ export const HeartScore = __t.object("HeartScore", {
 });
 export type HeartScore = __Infer<typeof HeartScore>;
 
+export const PhotoGroup = __t.object("PhotoGroup", {
+  id: __t.u64(),
+  label: __t.string(),
+  createdAt: __t.timestamp(),
+});
+export type PhotoGroup = __Infer<typeof PhotoGroup>;
+
+export const PhotoGroupMember = __t.object("PhotoGroupMember", {
+  id: __t.u64(),
+  groupId: __t.u64(),
+  guestId: __t.u64(),
+  position: __t.u64(),
+});
+export type PhotoGroupMember = __Infer<typeof PhotoGroupMember>;
+
 export const TimelineConfig = __t.object("TimelineConfig", {
   id: __t.u64(),
   released: __t.bool(),

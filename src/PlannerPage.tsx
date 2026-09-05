@@ -96,6 +96,8 @@ function AuthenticatedPlanner({ idToken, email, onSignOut }: { idToken: string; 
         'SELECT * FROM budget_item',
         'SELECT * FROM timeline_entry',
         'SELECT * FROM timeline_config',
+        'SELECT * FROM photo_group',
+        'SELECT * FROM photo_group_member',
       ]);
     };
     const onConnectError = (_ctx: ErrorContext, err: Error) => {
@@ -123,6 +125,9 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const [budgetItems] = useTable(tables.budgetItem);
   const [timelineEntries] = useTable(tables.timelineEntry);
   const [timelineConfigs] = useTable(tables.timelineConfig);
+  const [photoGroups] = useTable(tables.photoGroup);
+  const [photoGroupMembers] = useTable(tables.photoGroupMember);
+
   const addTodo = useReducer(reducers.addTodo);
   const toggleTodo = useReducer(reducers.toggleTodo);
   const deleteTodo = useReducer(reducers.deleteTodo);
@@ -137,10 +142,15 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const updateTimelineEntry = useReducer(reducers.updateTimelineEntry);
   const deleteTimelineEntry = useReducer(reducers.deleteTimelineEntry);
   const toggleTimelineReleased = useReducer(reducers.toggleTimelineReleased);
+  const addPhotoGroup = useReducer(reducers.addPhotoGroup);
+  const deletePhotoGroup = useReducer(reducers.deletePhotoGroup);
+  const renamePhotoGroup = useReducer(reducers.renamePhotoGroup);
+  const addGuestToPhotoGroup = useReducer(reducers.addGuestToPhotoGroup);
+  const removeGuestFromPhotoGroup = useReducer(reducers.removeGuestFromPhotoGroup);
 
   const [newTodo, setNewTodo] = useState('');
   const [newGuest, setNewGuest] = useState('');
-  const [activeTab, setActiveTab] = useState<'guests' | 'todos' | 'budget' | 'timeline'>('guests');
+  const [activeTab, setActiveTab] = useState<'guests' | 'todos' | 'budget' | 'timeline' | 'fotokonstellationen'>('guests');
   const [editingId, setEditingId] = useState<bigint | null>(null);
   const [editingName, setEditingName] = useState('');
   const [editingDietaryId, setEditingDietaryId] = useState<bigint | null>(null);
@@ -158,6 +168,11 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const [editingTimelineTime, setEditingTimelineTime] = useState('');
   const [editingTimelineTitle, setEditingTimelineTitle] = useState('');
   const [editingTimelineLocation, setEditingTimelineLocation] = useState('');
+  const [newPhotoGroupLabel, setNewPhotoGroupLabel] = useState('');
+  const [editingPhotoGroupId, setEditingPhotoGroupId] = useState<bigint | null>(null);
+  const [editingPhotoGroupLabel, setEditingPhotoGroupLabel] = useState('');
+  const [selectedPhotoGroupId, setSelectedPhotoGroupId] = useState<bigint | null>(null);
+  const [addingGuestToGroupId, setAddingGuestToGroupId] = useState<bigint | null>(null);
 
   const sortedTodos = [...todos].sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
@@ -389,6 +404,12 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
             onClick={() => setActiveTab('timeline')}
           >
             Zeitplan {isTimelineReleased ? '' : '(Entwurf)'}
+          </button>
+          <button
+            className={`planner-tab ${activeTab === 'fotokonstellationen' ? 'active' : ''}`}
+            onClick={() => setActiveTab('fotokonstellationen')}
+          >
+            Fotos
           </button>
         </div>
 
@@ -772,6 +793,175 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
             </ul>
           </section>
         )}
+
+        {/* Photo Constellations Tab */}
+        {activeTab === 'fotokonstellationen' && (
+          <section className="planner-section">
+            {/* Add new group */}
+            <div className="planner-add-row">
+              <input
+                type="text"
+                value={newPhotoGroupLabel}
+                onChange={(e) => setNewPhotoGroupLabel(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newPhotoGroupLabel.trim() && addPhotoGroup) {
+                    addPhotoGroup({ label: newPhotoGroupLabel.trim() });
+                    setNewPhotoGroupLabel('');
+                  }
+                }}
+                placeholder="z.B. Dettingen, Claudias Freunde..."
+                className="planner-input"
+              />
+              <button
+                onClick={() => {
+                  if (newPhotoGroupLabel.trim() && addPhotoGroup) {
+                    addPhotoGroup({ label: newPhotoGroupLabel.trim() });
+                    setNewPhotoGroupLabel('');
+                  }
+                }}
+                className="planner-add-btn"
+              >
+                +
+              </button>
+            </div>
+
+            {/* Photo groups list */}
+            <div className="photo-groups-list">
+              {[...photoGroups].sort((a, b) => a.createdAt.microsSinceUnixEpoch > b.createdAt.microsSinceUnixEpoch ? 1 : -1).map((group) => {
+                const members = photoGroupMembers.filter((m) => m.groupId === group.id).sort((a, b) => Number(a.position - b.position));
+                const groupGuests = members.map((m) => guests.find((g) => g.id === m.guestId)).filter(Boolean);
+                const isSelected = selectedPhotoGroupId === group.id;
+
+                return (
+                  <div key={group.id.toString()} className={`photo-group-card ${isSelected ? 'selected' : ''}`}>
+                    <div className="photo-group-header">
+                      {editingPhotoGroupId === group.id ? (
+                        <input
+                          type="text"
+                          value={editingPhotoGroupLabel}
+                          onChange={(e) => setEditingPhotoGroupLabel(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && renamePhotoGroup && editingPhotoGroupLabel.trim()) {
+                              renamePhotoGroup({ groupId: group.id, newLabel: editingPhotoGroupLabel.trim() });
+                              setEditingPhotoGroupId(null);
+                              setEditingPhotoGroupLabel('');
+                            }
+                          }}
+                          onBlur={() => {
+                            if (renamePhotoGroup && editingPhotoGroupLabel.trim()) {
+                              renamePhotoGroup({ groupId: group.id, newLabel: editingPhotoGroupLabel.trim() });
+                            }
+                            setEditingPhotoGroupId(null);
+                            setEditingPhotoGroupLabel('');
+                          }}
+                          autoFocus
+                          className="planner-input photo-group-edit-input"
+                        />
+                      ) : (
+                        <span
+                          className="photo-group-label"
+                          onClick={() => {
+                            setSelectedPhotoGroupId(isSelected ? null : group.id);
+                            setAddingGuestToGroupId(null);
+                          }}
+                        >
+                          {group.label}
+                        </span>
+                      )}
+                      <div className="photo-group-actions">
+                        <button
+                          onClick={() => {
+                            setEditingPhotoGroupId(group.id);
+                            setEditingPhotoGroupLabel(group.label);
+                          }}
+                          className="planner-action-btn"
+                          title="Bearbeiten"
+                        >
+                          ✏
+                        </button>
+                        <button
+                          onClick={() => deletePhotoGroup && deletePhotoGroup({ groupId: group.id })}
+                          className="planner-delete-btn"
+                          title="Löschen"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+
+                    {isSelected && (
+                      <div className="photo-group-details">
+                        <div className="photo-group-guests">
+                          {groupGuests.map((guest) => {
+                            const member = members.find((m) => m.guestId === guest!.id);
+                            return (
+                              <div key={guest!.id.toString()} className="photo-group-guest">
+                                <span>{guest!.name}</span>
+                                <button
+                                  onClick={() => {
+                                    if (member && removeGuestFromPhotoGroup) {
+                                      removeGuestFromPhotoGroup({ memberId: member.id });
+                                    }
+                                  }}
+                                  className="planner-delete-btn"
+                                  title="Aus Gruppe entfernen"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {addingGuestToGroupId === group.id ? (
+                          <div className="photo-group-add-guest">
+                            <select
+                              onChange={(e) => {
+                                const guestId = BigInt(e.target.value);
+                                if (addGuestToPhotoGroup) {
+                                  addGuestToPhotoGroup({ groupId: group.id, guestId });
+                                  setAddingGuestToGroupId(null);
+                                }
+                              }}
+                              className="planner-input"
+                              defaultValue=""
+                            >
+                              <option value="">Gast auswählen...</option>
+                              {guests
+                                .filter((g) => !members.some((m) => m.guestId === g.id))
+                                .sort((a, b) => a.name.localeCompare(b.name))
+                                .map((guest) => (
+                                  <option key={guest.id.toString()} value={guest.id.toString()}>
+                                    {guest.name}
+                                  </option>
+                                ))}
+                            </select>
+                            <button
+                              onClick={() => setAddingGuestToGroupId(null)}
+                              className="planner-delete-btn"
+                              title="Abbrechen"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setAddingGuestToGroupId(group.id)}
+                            className="planner-add-btn photo-group-add-btn"
+                          >
+                            Gast hinzufügen
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {photoGroups.length === 0 && <p className="planner-empty">Noch keine Fotokonstellationen vorhanden.</p>}
+            </div>
+          </section>
+        )}
+
       </div>
     </>
   );

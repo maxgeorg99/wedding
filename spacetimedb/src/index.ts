@@ -100,6 +100,30 @@ const spacetimedb = schema({
       released: t.bool(),
     }
   ),
+  photoGroup: table(
+    {
+      name: 'photo_group',
+      public: true,
+    },
+    {
+      id: t.u64().primaryKey().autoInc(),
+      label: t.string(),
+      createdAt: t.timestamp(),
+    }
+  ),
+  photoGroupMember: table(
+    {
+      name: 'photo_group_member',
+      public: true,
+      indexes: [{ accessor: 'byGroupId', algorithm: 'btree', columns: ['groupId'] }],
+    },
+    {
+      id: t.u64().primaryKey().autoInc(),
+      groupId: t.u64(),
+      guestId: t.u64(),
+      position: t.u64(),
+    }
+  ),
 });
 export default spacetimedb;
 
@@ -527,3 +551,83 @@ export const toggle_timeline_released = spacetimedb.reducer(
     }
   }
 );
+
+// ===== Photo Constellations =====
+
+export const add_photo_group = spacetimedb.reducer(
+  { label: t.string() },
+  (ctx, { label }) => {
+    requirePlanner(ctx);
+    if (!label.trim()) throw new SenderError('Label ist erforderlich');
+    ctx.db.photoGroup.insert({
+      id: 0n,
+      label: label.trim(),
+      createdAt: ctx.timestamp,
+    });
+  }
+);
+
+export const delete_photo_group = spacetimedb.reducer(
+  { groupId: t.u64() },
+  (ctx, { groupId }) => {
+    requirePlanner(ctx);
+    const group = ctx.db.photoGroup.id.find(groupId);
+    if (!group) throw new SenderError('Gruppe nicht gefunden');
+    ctx.db.photoGroup.id.delete(groupId);
+    // Remove all members of this group
+    for (const member of ctx.db.photoGroupMember.byGroupId.filter(groupId)) {
+      ctx.db.photoGroupMember.id.delete(member.id);
+    }
+  }
+);
+
+export const rename_photo_group = spacetimedb.reducer(
+  { groupId: t.u64(), newLabel: t.string() },
+  (ctx, { groupId, newLabel }) => {
+    requirePlanner(ctx);
+    if (!newLabel.trim()) throw new SenderError('Label ist erforderlich');
+    const group = ctx.db.photoGroup.id.find(groupId);
+    if (!group) throw new SenderError('Gruppe nicht gefunden');
+    ctx.db.photoGroup.id.update({ ...group, label: newLabel.trim() });
+  }
+);
+
+export const add_guest_to_photo_group = spacetimedb.reducer(
+  { groupId: t.u64(), guestId: t.u64() },
+  (ctx, { groupId, guestId }) => {
+    requirePlanner(ctx);
+    const group = ctx.db.photoGroup.id.find(groupId);
+    if (!group) throw new SenderError('Gruppe nicht gefunden');
+    const guest = ctx.db.guest.id.find(guestId);
+    if (!guest) throw new SenderError('Gast nicht gefunden');
+
+    // Check if already in group
+    for (const member of ctx.db.photoGroupMember.byGroupId.filter(groupId)) {
+      if (member.guestId === guestId) return; // Already in group
+    }
+
+    // Find max position in group
+    let maxPos = 0n;
+    for (const member of ctx.db.photoGroupMember.byGroupId.filter(groupId)) {
+      if (member.position > maxPos) maxPos = member.position;
+    }
+
+    ctx.db.photoGroupMember.insert({
+      id: 0n,
+      groupId,
+      guestId,
+      position: maxPos + 1n,
+    });
+  }
+);
+
+export const remove_guest_from_photo_group = spacetimedb.reducer(
+  { memberId: t.u64() },
+  (ctx, { memberId }) => {
+    requirePlanner(ctx);
+    const member = ctx.db.photoGroupMember.id.find(memberId);
+    if (!member) throw new SenderError('Mitglied nicht gefunden');
+    ctx.db.photoGroupMember.id.delete(memberId);
+  }
+);
+

@@ -1544,3 +1544,138 @@ h1, h2 {
 .impressum p {
   margin-bottom: 0.75rem;
 }
+
+/* ===== Photo Constellations ===== */
+.photo-groups-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.photo-group-card {
+  border: 1px solid #d4c5b7;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background-color: #fff;
+  transition: all 0.2s ease;
+}
+
+.photo-group-card.selected {
+  border-color: #c4956a;
+  background-color: #faf7f3;
+  box-shadow: 0 2px 8px rgba(196, 149, 106, 0.1);
+}
+
+.photo-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.photo-group-label {
+  flex: 1;
+  font-weight: 600;
+  color: #5a3e2b;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s ease;
+}
+
+.photo-group-label:hover {
+  background-color: #f5eee8;
+}
+
+.photo-group-edit-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #d4c5b7;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.photo-group-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.photo-group-actions button {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  background-color: #e8ddd2;
+  color: #5a3e2b;
+  transition: background-color 0.2s ease;
+}
+
+.photo-group-actions button:hover {
+  background-color: #d4c5b7;
+}
+
+.planner-action-btn {
+  background-color: #e8ddd2 !important;
+}
+
+.photo-group-details {
+  border-top: 1px solid #d4c5b7;
+  padding-top: 0.75rem;
+}
+
+.photo-group-guests {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.photo-group-guest {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: #f5eee8;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.photo-group-add-guest {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.photo-group-add-guest select {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #d4c5b7;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.photo-group-add-btn {
+  width: 100%;
+  padding: 0.5rem;
+  background-color: #c4956a;
+  color: #fff;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.photo-group-add-btn:hover {
+  background-color: #a8845a;
+}
+
+.planner-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #8b7355;
+  font-style: italic;
+}
