@@ -281,6 +281,10 @@ function App() {
               was wir zum Leben brauchen, wünschen wir uns statt Geschenken eine
               kleine finanzielle Unterstützung für unsere gemeinsamen Träume.
             </p>
+            <div className="faq-item">
+              <p className="faq-question">Ihr wollt selbst etwas organisieren oder habt noch weitere Fragen?</p>
+              <p className="faq-answer">Meldet euch gerne bei unserern Trauzeugen Carola & Paul</p>
+            </div>
           </div>
         </section>
 
