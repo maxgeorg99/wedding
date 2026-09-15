@@ -34,9 +34,27 @@ const gameSession = table(
   }
 );
 
+const seatAssignment = table(
+  {
+    name: 'seat_assignment',
+    public: true,
+    indexes: [
+      { accessor: 'byGuestId', algorithm: 'btree', columns: ['guestId'] },
+      { accessor: 'bySeatId', algorithm: 'btree', columns: ['seatId'] },
+    ],
+  },
+  {
+    id: t.u64().primaryKey().autoInc(),
+    seatId: t.u64(),
+    guestId: t.u64().optional(),
+    createdAt: t.timestamp(),
+  }
+);
+
 const spacetimedb = schema({
   guest,
   gameSession,
+  seatAssignment,
   heartScore: table(
     {
       name: 'heart_score',
@@ -239,6 +257,20 @@ export const init = spacetimedb.init((ctx) => {
 
   // Timeline not released by default
   ctx.db.timelineConfig.insert({ id: 0n, released: false });
+
+  // Initialize seat assignments: 2 rows × 2 tables × 11 seats = 44 seats
+  for (let row = 1; row <= 2; row++) {
+    for (let table = 1; table <= 2; table++) {
+      for (let seat = 1; seat <= 11; seat++) {
+        ctx.db.seatAssignment.insert({
+          id: 0n,
+          seatId: BigInt(row * 1000 + table * 100 + seat),
+          guestId: undefined,
+          createdAt: ctx.timestamp,
+        });
+      }
+    }
+  }
 });
 
 // TEMPORARY — remove after checking JWT claims
@@ -628,6 +660,27 @@ export const remove_guest_from_photo_group = spacetimedb.reducer(
     const member = ctx.db.photoGroupMember.id.find(memberId);
     if (!member) throw new SenderError('Mitglied nicht gefunden');
     ctx.db.photoGroupMember.id.delete(memberId);
+  }
+);
+
+// ===== Seat Plan =====
+
+export const assign_guest_to_seat = spacetimedb.reducer(
+  { seatId: t.u64(), guestId: t.option(t.u64()) },
+  (ctx, { seatId, guestId }) => {
+    requirePlanner(ctx);
+
+    // Find the seat assignment
+    for (const seat of ctx.db.seatAssignment.bySeatId.filter(seatId)) {
+      if (guestId !== undefined) {
+        // Verify guest exists
+        const guest = ctx.db.guest.id.find(guestId);
+        if (!guest) throw new SenderError('Gast nicht gefunden');
+      }
+      ctx.db.seatAssignment.id.update({ ...seat, guestId: guestId ?? undefined });
+      return;
+    }
+    throw new SenderError('Sitz nicht gefunden');
   }
 );
 

@@ -98,6 +98,7 @@ function AuthenticatedPlanner({ idToken, email, onSignOut }: { idToken: string; 
         'SELECT * FROM timeline_config',
         'SELECT * FROM photo_group',
         'SELECT * FROM photo_group_member',
+        'SELECT * FROM seat_assignment',
       ]);
     };
     const onConnectError = (_ctx: ErrorContext, err: Error) => {
@@ -127,6 +128,7 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const [timelineConfigs] = useTable(tables.timelineConfig);
   const [photoGroups] = useTable(tables.photoGroup);
   const [photoGroupMembers] = useTable(tables.photoGroupMember);
+  const [seatAssignments] = useTable(tables.seatAssignment);
 
   const addTodo = useReducer(reducers.addTodo);
   const toggleTodo = useReducer(reducers.toggleTodo);
@@ -147,10 +149,11 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const renamePhotoGroup = useReducer(reducers.renamePhotoGroup);
   const addGuestToPhotoGroup = useReducer(reducers.addGuestToPhotoGroup);
   const removeGuestFromPhotoGroup = useReducer(reducers.removeGuestFromPhotoGroup);
+  const assignGuestToSeat = useReducer(reducers.assignGuestToSeat);
 
   const [newTodo, setNewTodo] = useState('');
   const [newGuest, setNewGuest] = useState('');
-  const [activeTab, setActiveTab] = useState<'guests' | 'todos' | 'budget' | 'timeline' | 'fotokonstellationen'>('guests');
+  const [activeTab, setActiveTab] = useState<'guests' | 'todos' | 'budget' | 'timeline' | 'fotokonstellationen' | 'sitzplan'>('guests');
   const [editingId, setEditingId] = useState<bigint | null>(null);
   const [editingName, setEditingName] = useState('');
   const [editingDietaryId, setEditingDietaryId] = useState<bigint | null>(null);
@@ -410,6 +413,12 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
             onClick={() => setActiveTab('fotokonstellationen')}
           >
             Fotos
+          </button>
+          <button
+            className={`planner-tab ${activeTab === 'sitzplan' ? 'active' : ''}`}
+            onClick={() => setActiveTab('sitzplan')}
+          >
+            Sitzplan
           </button>
         </div>
 
@@ -967,6 +976,59 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
                 );
               })}
               {photoGroups.length === 0 && <p className="planner-empty">Noch keine Fotokonstellationen vorhanden.</p>}
+            </div>
+          </section>
+        )}
+
+        {/* Seat Plan Tab */}
+        {activeTab === 'sitzplan' && (
+          <section className="planner-section">
+            <h3>Sitzplan</h3>
+            <div className="seat-plan">
+              {[1, 2].map((row) => (
+                <div key={`row-${row}`} className="seat-plan-row">
+                  <h4>Reihe {row}</h4>
+                  <div className="seat-plan-row-tables">
+                    {[1, 2].map((table) => (
+                      <div key={`table-${row}-${table}`} className="seat-plan-table">
+                        <h5>Tisch {table}</h5>
+                        <div className="seat-plan-seats">
+                          {Array.from({ length: 11 }).map((_, i) => {
+                            const seatId = BigInt(row * 1000 + table * 100 + (i + 1));
+                            const assignment = seatAssignments.find((a) => a.seatId === seatId);
+                            const guest = assignment?.guestId ? guests.find((g) => g.id === assignment.guestId) : null;
+                            return (
+                              <div key={`seat-${seatId}`} className="seat-plan-seat">
+                                <label>Platz {i + 1}</label>
+                                <select
+                                  value={guest?.id?.toString() || ''}
+                                  onChange={(e) => {
+                                    const guestId = e.target.value ? BigInt(e.target.value) : null;
+                                    if (assignGuestToSeat) {
+                                      assignGuestToSeat({ seatId, guestId: guestId ?? undefined });
+                                    }
+                                  }}
+                                  className="seat-assignment-select"
+                                >
+                                  <option value="">Leer</option>
+                                  {guests
+                                    .filter((g) => g.attending || g.id === guest?.id)
+                                    .sort((a, b) => a.name.localeCompare(b.name))
+                                    .map((g) => (
+                                      <option key={g.id.toString()} value={g.id.toString()}>
+                                        {g.name}
+                                      </option>
+                                    ))}
+                                </select>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
         )}

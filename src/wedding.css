@@ -1692,3 +1692,86 @@ h1, h2 {
   color: #8b7355;
   font-style: italic;
 }
+
+/* ===== Seat Plan ===== */
+.seat-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  padding: 2rem 0;
+}
+
+.seat-plan-row {
+  border: 2px solid #c4956a;
+  border-radius: 8px;
+  padding: 2rem;
+  background-color: #fef9f3;
+}
+
+.seat-plan-row h4 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #5a3e2b;
+  font-size: 1.1rem;
+}
+
+.seat-plan-row-tables {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.seat-plan-table {
+  border: 1px solid #c4956a;
+  border-radius: 6px;
+  padding: 1.5rem;
+  background-color: white;
+}
+
+.seat-plan-table h5 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #5a3e2b;
+  font-size: 0.95rem;
+}
+
+.seat-plan-seats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.seat-plan-seat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.seat-plan-seat label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b5744;
+  text-align: center;
+}
+
+.seat-assignment-select {
+  padding: 0.5rem 0.4rem;
+  border: 1px solid #c4956a;
+  border-radius: 4px;
+  background-color: white;
+  color: #5a3e2b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.seat-assignment-select:hover {
+  border-color: #a8845a;
+  background-color: #fef9f3;
+}
+
+.seat-assignment-select:focus {
+  outline: none;
+  border-color: #8b7355;
+  box-shadow: 0 0 0 2px rgba(139, 115, 85, 0.1);
+}
