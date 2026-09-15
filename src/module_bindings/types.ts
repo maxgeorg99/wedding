@@ -61,6 +61,14 @@ export const PhotoGroupMember = __t.object("PhotoGroupMember", {
 });
 export type PhotoGroupMember = __Infer<typeof PhotoGroupMember>;
 
+export const SeatAssignment = __t.object("SeatAssignment", {
+  id: __t.u64(),
+  seatId: __t.u64(),
+  guestId: __t.option(__t.u64()),
+  createdAt: __t.timestamp(),
+});
+export type SeatAssignment = __Infer<typeof SeatAssignment>;
+
 export const TimelineConfig = __t.object("TimelineConfig", {
   id: __t.u64(),
   released: __t.bool(),

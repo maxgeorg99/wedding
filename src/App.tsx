@@ -279,9 +279,9 @@ function App() {
             <p className="faq-answer">
               Da wir bereits einen gemeinsamen Haushalt führen und alles haben,
               was wir zum Leben brauchen, wünschen wir uns statt Geschenken eine
-              kleine finanzielle Unterstützung für unsere gemeinsamen Träume.
-
-              IBAN: DE65 1203 0000 1082 8815 49
+              kleine finanzielle Unterstützung für unsere gemeinsamen Träume. <br/>
+              IBAN: DE65 1203 0000 1082 8815 49 <br/>
+              Name: Maximilian Georg und Claudia Hahn <br/>
             </p>
             <div className="faq-item">
               <p className="faq-question">Ihr wollt selbst etwas organisieren oder habt noch weitere Fragen?</p>

@@ -12,6 +12,7 @@ import AddGuestToPhotoGroupReducer from "../add_guest_to_photo_group_reducer";
 import AddPhotoGroupReducer from "../add_photo_group_reducer";
 import AddTimelineEntryReducer from "../add_timeline_entry_reducer";
 import AddTodoReducer from "../add_todo_reducer";
+import AssignGuestToSeatReducer from "../assign_guest_to_seat_reducer";
 import DebugJwtReducer from "../debug_jwt_reducer";
 import DeleteBudgetItemReducer from "../delete_budget_item_reducer";
 import DeletePhotoGroupReducer from "../delete_photo_group_reducer";
@@ -36,6 +37,7 @@ export type AddGuestToPhotoGroupParams = __Infer<typeof AddGuestToPhotoGroupRedu
 export type AddPhotoGroupParams = __Infer<typeof AddPhotoGroupReducer>;
 export type AddTimelineEntryParams = __Infer<typeof AddTimelineEntryReducer>;
 export type AddTodoParams = __Infer<typeof AddTodoReducer>;
+export type AssignGuestToSeatParams = __Infer<typeof AssignGuestToSeatReducer>;
 export type DebugJwtParams = __Infer<typeof DebugJwtReducer>;
 export type DeleteBudgetItemParams = __Infer<typeof DeleteBudgetItemReducer>;
 export type DeletePhotoGroupParams = __Infer<typeof DeletePhotoGroupReducer>;

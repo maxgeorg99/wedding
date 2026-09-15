@@ -15,6 +15,14 @@ function onSigninCallback() {
   window.history.replaceState({}, document.title, window.location.pathname);
 }
 
+/** Initials for a seat square, e.g. "Maximilian Georg" -> "MG" */
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 export default function PlannerPage() {
   return (
     <AuthProvider {...OIDC_CONFIG} onSigninCallback={onSigninCallback}>
@@ -176,6 +184,7 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
   const [editingPhotoGroupLabel, setEditingPhotoGroupLabel] = useState('');
   const [selectedPhotoGroupId, setSelectedPhotoGroupId] = useState<bigint | null>(null);
   const [addingGuestToGroupId, setAddingGuestToGroupId] = useState<bigint | null>(null);
+  const [openSeat, setOpenSeat] = useState<{ seatId: bigint; seatNum: number } | null>(null);
 
   const sortedTodos = [...todos].sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
@@ -345,6 +354,12 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
     if (window.confirm(msg)) {
       toggleTimelineReleased({ released: newState });
     }
+  };
+
+  const handleAssignSeat = (seatId: bigint, guestId: bigint | null) => {
+    if (!assignGuestToSeat) return;
+    assignGuestToSeat({ seatId, guestId: guestId ?? undefined });
+    setOpenSeat(null);
   };
 
   return (
@@ -984,52 +999,76 @@ function PlannerContent({ email, onSignOut }: { email: string; onSignOut: () => 
         {activeTab === 'sitzplan' && (
           <section className="planner-section">
             <h3>Sitzplan</h3>
+            <p className="seat-plan-hint">Auf einen Platz klicken, um einen Gast zuzuweisen.</p>
             <div className="seat-plan">
-              {[1, 2].map((row) => (
-                <div key={`row-${row}`} className="seat-plan-row">
-                  <h4>Reihe {row}</h4>
-                  <div className="seat-plan-row-tables">
-                    {[1, 2].map((table) => (
-                      <div key={`table-${row}-${table}`} className="seat-plan-table">
-                        <h5>Tisch {table}</h5>
-                        <div className="seat-plan-seats">
-                          {Array.from({ length: 11 }).map((_, i) => {
-                            const seatId = BigInt(row * 1000 + table * 100 + (i + 1));
-                            const assignment = seatAssignments.find((a) => a.seatId === seatId);
-                            const guest = assignment?.guestId ? guests.find((g) => g.id === assignment.guestId) : null;
-                            return (
-                              <div key={`seat-${seatId}`} className="seat-plan-seat">
-                                <label>Platz {i + 1}</label>
-                                <select
-                                  value={guest?.id?.toString() || ''}
-                                  onChange={(e) => {
-                                    const guestId = e.target.value ? BigInt(e.target.value) : null;
-                                    if (assignGuestToSeat) {
-                                      assignGuestToSeat({ seatId, guestId: guestId ?? undefined });
-                                    }
-                                  }}
-                                  className="seat-assignment-select"
-                                >
-                                  <option value="">Leer</option>
-                                  {guests
-                                    .filter((g) => g.attending || g.id === guest?.id)
-                                    .sort((a, b) => a.name.localeCompare(b.name))
-                                    .map((g) => (
-                                      <option key={g.id.toString()} value={g.id.toString()}>
-                                        {g.name}
-                                      </option>
-                                    ))}
-                                </select>
-                              </div>
-                            );
-                          })}
-                        </div>
+              {[1, 2].map((tableNum) => (
+                <div key={`table-${tableNum}`} className={`seat-plan-table seat-plan-table-${tableNum}`}>
+                  <h4>Tisch {tableNum}</h4>
+                  <div className="seat-plan-table-body">
+                    {[1, 2].map((side) => (
+                      <div key={`side-${tableNum}-${side}`} className="seat-plan-side">
+                        {Array.from({ length: 11 }).map((_, i) => {
+                          const seatNum = i + 1;
+                          const seatId = BigInt(tableNum * 1000 + side * 100 + seatNum);
+                          const assignment = seatAssignments.find((a) => a.seatId === seatId);
+                          const guest = assignment?.guestId != null
+                            ? guests.find((g) => g.id === assignment.guestId)
+                            : null;
+                          return (
+                            <button
+                              key={`seat-${seatId}`}
+                              type="button"
+                              className={`seat-square ${guest ? 'is-assigned' : ''}`}
+                              title={guest ? guest.name : `Platz ${seatNum} (leer)`}
+                              onClick={() => setOpenSeat({ seatId, seatNum })}
+                            >
+                              {guest ? getInitials(guest.name) : seatNum}
+                            </button>
+                          );
+                        })}
                       </div>
                     ))}
                   </div>
                 </div>
               ))}
             </div>
+
+            {openSeat && (
+              <div className="seat-picker-overlay" onClick={() => setOpenSeat(null)}>
+                <div className="seat-picker-panel" onClick={(e) => e.stopPropagation()}>
+                  <div className="seat-picker-header">
+                    <span>Platz {openSeat.seatNum} zuweisen</span>
+                    <button
+                      className="planner-delete-btn"
+                      onClick={() => setOpenSeat(null)}
+                      title="Schließen"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="seat-picker-list">
+                    <button
+                      className="seat-picker-option seat-picker-clear"
+                      onClick={() => handleAssignSeat(openSeat.seatId, null)}
+                    >
+                      Leer
+                    </button>
+                    {guests
+                      .filter((g) => g.attending)
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map((g) => (
+                        <button
+                          key={g.id.toString()}
+                          className="seat-picker-option"
+                          onClick={() => handleAssignSeat(openSeat.seatId, g.id)}
+                        >
+                          {g.name}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
         )}
 

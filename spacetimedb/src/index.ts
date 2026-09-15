@@ -258,13 +258,13 @@ export const init = spacetimedb.init((ctx) => {
   // Timeline not released by default
   ctx.db.timelineConfig.insert({ id: 0n, released: false });
 
-  // Initialize seat assignments: 2 rows × 2 tables × 11 seats = 44 seats
-  for (let row = 1; row <= 2; row++) {
-    for (let table = 1; table <= 2; table++) {
+  // Initialize seat assignments: 2 tables × 2 sides × 11 seats = 44 seats
+  for (let table = 1; table <= 2; table++) {
+    for (let side = 1; side <= 2; side++) {
       for (let seat = 1; seat <= 11; seat++) {
         ctx.db.seatAssignment.insert({
           id: 0n,
-          seatId: BigInt(row * 1000 + table * 100 + seat),
+          seatId: BigInt(table * 1000 + side * 100 + seat),
           guestId: undefined,
           createdAt: ctx.timestamp,
         });
@@ -670,17 +670,24 @@ export const assign_guest_to_seat = spacetimedb.reducer(
   (ctx, { seatId, guestId }) => {
     requirePlanner(ctx);
 
-    // Find the seat assignment
+    if (guestId !== undefined) {
+      // Verify guest exists
+      const guest = ctx.db.guest.id.find(guestId);
+      if (!guest) throw new SenderError('Gast nicht gefunden');
+    }
+
+    // Find the seat assignment, or create it if it doesn't exist yet
+    // (seats are lazily created on first assignment rather than relying on init())
     for (const seat of ctx.db.seatAssignment.bySeatId.filter(seatId)) {
-      if (guestId !== undefined) {
-        // Verify guest exists
-        const guest = ctx.db.guest.id.find(guestId);
-        if (!guest) throw new SenderError('Gast nicht gefunden');
-      }
       ctx.db.seatAssignment.id.update({ ...seat, guestId: guestId ?? undefined });
       return;
     }
-    throw new SenderError('Sitz nicht gefunden');
+    ctx.db.seatAssignment.insert({
+      id: 0n,
+      seatId,
+      guestId: guestId ?? undefined,
+      createdAt: ctx.timestamp,
+    });
   }
 );
 

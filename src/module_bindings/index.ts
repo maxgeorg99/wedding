@@ -40,6 +40,7 @@ import AddGuestToPhotoGroupReducer from "./add_guest_to_photo_group_reducer";
 import AddPhotoGroupReducer from "./add_photo_group_reducer";
 import AddTimelineEntryReducer from "./add_timeline_entry_reducer";
 import AddTodoReducer from "./add_todo_reducer";
+import AssignGuestToSeatReducer from "./assign_guest_to_seat_reducer";
 import DebugJwtReducer from "./debug_jwt_reducer";
 import DeleteBudgetItemReducer from "./delete_budget_item_reducer";
 import DeletePhotoGroupReducer from "./delete_photo_group_reducer";
@@ -67,6 +68,7 @@ import GuestRow from "./guest_table";
 import HeartScoreRow from "./heart_score_table";
 import PhotoGroupRow from "./photo_group_table";
 import PhotoGroupMemberRow from "./photo_group_member_table";
+import SeatAssignmentRow from "./seat_assignment_table";
 import TimelineConfigRow from "./timeline_config_table";
 import TimelineEntryRow from "./timeline_entry_table";
 import UnclaimedGuestsRow from "./unclaimed_guests_table";
@@ -154,6 +156,23 @@ const tablesSchema = __schema({
       { name: 'photo_group_member_id_key', constraint: 'unique', columns: ['id'] },
     ],
   }, PhotoGroupMemberRow),
+  seatAssignment: __table({
+    name: 'seat_assignment',
+    indexes: [
+      { accessor: 'byGuestId', name: 'seat_assignment_guest_id_idx_btree', algorithm: 'btree', columns: [
+        'guestId',
+      ] },
+      { accessor: 'id', name: 'seat_assignment_id_idx_btree', algorithm: 'btree', columns: [
+        'id',
+      ] },
+      { accessor: 'bySeatId', name: 'seat_assignment_seat_id_idx_btree', algorithm: 'btree', columns: [
+        'seatId',
+      ] },
+    ],
+    constraints: [
+      { name: 'seat_assignment_id_key', constraint: 'unique', columns: ['id'] },
+    ],
+  }, SeatAssignmentRow),
   timelineConfig: __table({
     name: 'timeline_config',
     indexes: [
@@ -204,6 +223,7 @@ const reducersSchema = __reducers(
   __reducerSchema("add_photo_group", AddPhotoGroupReducer),
   __reducerSchema("add_timeline_entry", AddTimelineEntryReducer),
   __reducerSchema("add_todo", AddTodoReducer),
+  __reducerSchema("assign_guest_to_seat", AssignGuestToSeatReducer),
   __reducerSchema("debug_jwt", DebugJwtReducer),
   __reducerSchema("delete_budget_item", DeleteBudgetItemReducer),
   __reducerSchema("delete_photo_group", DeletePhotoGroupReducer),
