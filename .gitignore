@@ -33,7 +33,10 @@ AGENTS.md
 # Docs (internal)
 docs/
 
-# Lock files (bun)
-bun.lock
+# Backend lock file
 spacetimedb/bun.lock
 .vercel
+
+# Local browser checks and private guest-book source
+.playwright-cli/
+rive/

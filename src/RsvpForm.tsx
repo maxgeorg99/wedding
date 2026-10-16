@@ -31,7 +31,7 @@ export default function RsvpForm() {
   const fieldRef = useRef<HTMLDivElement>(null);
 
   const fuse = useMemo(
-    () => new Fuse(unclaimedGuests as GuestRow[], { keys: ['name'], threshold: 0.4 }),
+    () => new Fuse<GuestRow>(unclaimedGuests, { keys: ['name'], threshold: 0.4 }),
     [unclaimedGuests]
   );
 

@@ -9,7 +9,7 @@ function ImpressumPage() {
 
         <h2>Angaben gem. &sect; 5 TMG</h2>
         <p>
-          Maximilian Georg<br />
+          Maximilian Hahn<br />
           Kolbergerstraße 16D<br />
           76139 Karlsruhe
         </p>
@@ -35,6 +35,13 @@ function ImpressumPage() {
           (beispielsweise Name oder E-Mail-Adressen) erhoben werden, erfolgt
           dies stets auf freiwilliger Basis. Diese Daten werden ohne Ihre
           ausdr&uuml;ckliche Zustimmung nicht an Dritte weitergegeben.
+        </p>
+
+        <h2>Gästebuch-Animation</h2>
+        <p>
+          Grundlage: <a href="https://rive.app/marketplace/24847-46420-3d-book-with-page-flip-animation/">3D Book with page flip animation</a> von Tom_acco,
+          lizenziert unter <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+          Für unser Gästebuch angepasst: Originalseiten, rosa Einband, Öffnungsanimation und Navigation.
         </p>
 
         <Link to="/" className="rsvp-button" style={{ marginTop: '2rem', display: 'inline-block' }}>

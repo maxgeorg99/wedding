@@ -1,8 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import App from './App.tsx';
-import RsvpPage from './RsvpPage.tsx';
 import HeartGame from './HeartGame.tsx';
 import PlannerPage from './PlannerPage.tsx';
 import ImpressumPage from './ImpressumPage.tsx';
@@ -40,18 +39,23 @@ const connectionBuilder = DbConnection.builder()
   .onDisconnect(onDisconnect)
   .onConnectError(onConnectError);
 
+function PlanningRoutes() {
+  return <SpacetimeDBProvider connectionBuilder={connectionBuilder}><Outlet /></SpacetimeDBProvider>;
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <SpacetimeDBProvider connectionBuilder={connectionBuilder}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/rsvp" element={<RsvpPage />} />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<App />} />
+        <Route path="/gaestebuch" element={<Navigate to="/#gaestebuch" replace />} />
+        <Route path="/rsvp" element={<Navigate to="/" replace />} />
+        <Route element={<PlanningRoutes />}>
           <Route path="/herzen" element={<HeartGame />} />
           <Route path="/planner" element={<PlannerPage />} />
-          <Route path="/impressum" element={<ImpressumPage />} />
-        </Routes>
-      </BrowserRouter>
-    </SpacetimeDBProvider>
+        </Route>
+        <Route path="/impressum" element={<ImpressumPage />} />
+      </Routes>
+    </BrowserRouter>
   </StrictMode>
 );

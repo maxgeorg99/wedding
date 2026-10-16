@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "iterations": 600000,
+  "salt": "dEV54wI8bKiHl6Q/jZ8Ibw==",
+  "iv": "BoGFmg/U6bt4GBBa",
+  "checkIv": "2HWO1qte/Q/ehR4r",
+  "check": "6j8YGzXLs6jEiEEo243CPeBDXaIG0cyS41wOFJ/2ltDZYTBcgSXxHv/zRA==",
+  "file": "book-72afecdb29058b07.enc"
+}

@@ -1,0 +1,21 @@
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { CHECK_TEXT, ITERATIONS, deriveBookKey, toBase64, type GuestbookManifest } from '../src/guestbookCrypto';
+
+const password = process.env.GUESTBOOK_PASSWORD;
+if (!password) throw new Error('Set GUESTBOOK_PASSWORD when packaging the guest book. Do not use a VITE_ variable.');
+const input = process.argv[2] ?? 'rive/physical-guestbook/build/physical-guestbook.riv';
+const data = await readFile(input);
+const salt = crypto.getRandomValues(new Uint8Array(16));
+const iv = crypto.getRandomValues(new Uint8Array(12));
+const checkIv = crypto.getRandomValues(new Uint8Array(12));
+const key = await deriveBookKey(password, salt);
+const encrypted = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data));
+const check = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: checkIv }, key, new TextEncoder().encode(CHECK_TEXT)));
+const hash = createHash('sha256').update(encrypted).digest('hex').slice(0,16);
+const file = `book-${hash}.enc`;
+const manifest: GuestbookManifest = { version: 1, iterations: ITERATIONS, salt: toBase64(salt), iv: toBase64(iv), checkIv: toBase64(checkIv), check: toBase64(check), file };
+await mkdir('public/guestbook', { recursive: true });
+await writeFile(`public/guestbook/${file}`, encrypted);
+await writeFile('public/guestbook/manifest.json', JSON.stringify(manifest, null, 2) + '\n');
+console.log(`Packaged encrypted guest book (${(encrypted.length/1024/1024).toFixed(1)} MB). No password or plaintext copied to public/.`);
